@@ -12,14 +12,14 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { generateKeyPairSync, sign, verify as nodeVerify } from 'node:crypto';
 import * as S from '../sentinel.mjs';
-import { streams, BASELINE } from '../streams.mjs';
+import { streams, nearBoundary, BASELINE } from '../streams.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const sha = (s) => createHash('sha256').update(s).digest('hex');
 const text = (f) => readFileSync(join(ROOT, f), 'utf8').replace(/\r\n/g, '\n');
 const stable = (o) => JSON.stringify(o, null, 1) + '\n';
 const has = (f) => process.argv.includes(f);
-export const CONFIG = { sources: 4, valid: 48, perAttack: 8, streamsTrain: 60, streamsHeld: 60, grow: { tries: 2000, weightSpan: 4, maxThreshold: 1 }, seed: 2718 };
+export const CONFIG = { sources: 4, valid: 48, perAttack: 8, streamsTrain: 60, streamsHeld: 60, grow: { tries: 2000, weightSpan: 4, maxThreshold: 1 }, seed: 2718, bounded: { cap: 64, flood: 400 }, coupled: { packets: 20, perPacketCap: 3000 } };
 const verify = (pub, msg, sig) => { try { return nodeVerify(null, Buffer.from(msg), pub, Buffer.from(sig)); } catch { return false; } };
 const draw = (r, k) => Math.floor(r() * k);
 
@@ -90,6 +90,89 @@ export function runGrown(cfg) {
   return { detector: grown, trainN: train.length, heldN: held.length, heldAttacks: g.attacks, grownCatch: g.caught, grownFalsePass: g.falsePass, baselineCatch: b.caught, baselineFalsePass: b.falsePass };
 }
 
+// ── flag 1: the bounded replay store under a flood ───────────────────────────────────────────────────────────────────
+// Flood the gate with F unique signed packets through a bounded store of cap C (C < F). Prove the store never exceeds C
+// while every replay still inside the window is caught. Deterministic counts (fresh keys, but the counts are the same).
+export function runBounded(keys, privs, cfg) {
+  const { cap, flood } = cfg.bounded;
+  const store = S.replayStore(cap);
+  const keyring = {}, lattice = {};
+  for (let i = 0; i < cfg.sources; i++) { keyring[i] = keys[i]; lattice[i] = { maxBudget: 65535, resources: 0xFF }; }
+  const ctx = { keys: keyring, lattice, seen: store, verify };
+  const accepted = [];
+  let maxSize = 0;
+  for (let i = 0; i < flood; i++) {                       // every packet is distinct (budget = 1+i), so every one is unseen and accepted
+    const src = i % cfg.sources;
+    const raw = wire(src, privs[src], S.pack({ opcode: i % 8, source: src, target: i % 16, resources: (i % 63) + 1, budget: 1 + i }));
+    if (S.check(raw, ctx).ok) accepted.push(raw);
+    if (store.size > maxSize) maxSize = store.size;
+  }
+  // in-window replays: the last `cap` accepted nonces are exactly what the store still holds — every one must be caught
+  const window = accepted.slice(-cap);
+  let replaysTried = 0, replaysCaught = 0;
+  for (let k = 0; k < window.length; k++) { replaysTried += 1; if (S.check(window[k], ctx).reason === 'replay') replaysCaught += 1; }
+  // the honest trade: a packet older than the window was evicted and is no longer caught (done last — it mutates the store)
+  const evictedReplayCaught = accepted.length > cap ? S.check(accepted[0], ctx).reason === 'replay' : null;
+  return { cap, flood, accepted: accepted.length, maxSize, replaysTried, replaysCaught, evictedReplayCaught };
+}
+
+// ── flag 2: the gate + the detector, coupled ─────────────────────────────────────────────────────────────────────────
+// A stream of packets each WITHIN the per-packet budget cumulatively drains far more than the cap. Every one passes the
+// per-packet gate (rejected === 0); the detector over the accepted window is what catches the drain.
+export function runCoupled(keys, privs, cfg, detector) {
+  const { packets, perPacketCap } = cfg.coupled;
+  const keyring = {}, lattice = {};
+  for (let i = 0; i < cfg.sources; i++) { keyring[i] = keys[i]; lattice[i] = { maxBudget: perPacketCap, resources: 0xFF }; }
+  const ctx = { keys: keyring, lattice, seen: new Set(), verify };
+  const src = 0, stream = [];
+  for (let i = 0; i < packets; i++) stream.push(wire(src, privs[src], S.pack({ opcode: 1, source: src, target: i % 16, resources: 0b000001, budget: perPacketCap - i }))); // each ≤ cap, all distinct
+  const res = S.immune(stream, ctx, detector);
+  return { total: res.total, accepted: res.accepted, rejected: res.rejected, budgetDrawn: res.budgetDrawn, flagged: res.flagged, perPacketCap };
+}
+
+// ── flag 3: the grown detector on a harder, near-boundary held-out set ────────────────────────────────────────────────
+// The detector grown on the clean split is measured on streams sitting right at the cut (distribution shift). Reported
+// honestly: its catch rate at its own threshold, the best any threshold on its weights reaches with zero false pass, and
+// the baseline on the same set. Fully deterministic (no crypto).
+export function runNear(cfg, grown) {
+  const near = nearBoundary(cfg, cfg.seed + 5, cfg.streamsHeld);
+  const g = S.fitness(grown, near), b = S.fitness(BASELINE, near);
+  let sweepBest = 0, sweepThreshold = null;
+  for (let t = 0; t <= 1.5 + 1e-9; t = Math.round((t + 0.02) * 1000) / 1000) {
+    const f = S.fitness({ weights: grown.weights, threshold: t }, near);
+    if (!f.falsePass && f.caught > sweepBest) { sweepBest = f.caught; sweepThreshold = t; }
+  }
+  return { attacks: g.attacks, grownCatch: g.caught, grownFalsePass: g.falsePass, baselineCatch: b.caught, baselineFalsePass: b.falsePass, sweepBest, sweepThreshold };
+}
+
+// ── flag 4: the honeypot is a contained dead-end ─────────────────────────────────────────────────────────────────────
+// Every rejected attack is rerouted to a phantom cell; it must grant ZERO budget and no capability, and cannot be used as a
+// pivot (an unknown source, an over-budget grant, an un-granted resource are all still dropped). Measured, not asserted.
+export function runHoneypot(keys, privs, cfg) {
+  const { ctx, cases, baseRaw } = battery(keys, privs, cfg, cfg.seed);
+  S.check(baseRaw, ctx); // prime the replay so the replay attack is rejected and rerouted too
+  let rerouted = 0, budgetGranted = 0, granted = 0, leaked = 0;
+  for (const c of cases) {
+    if (c.kind !== 'attack') continue;
+    const v = S.check(c.raw, ctx);
+    if (v.ok) { leaked += 1; continue; }             // an attack the gate let through is a leak, never rerouted (expect 0)
+    const cell = S.phantom(v);
+    rerouted += 1;
+    budgetGranted += (cell.budget | 0);
+    if (cell.granted !== false) granted += 1;
+  }
+  // escalation probes: nothing derived from the dead-end gains budget or a capability
+  const src = 0, un = cfg.sources + 1;               // `un` is a known-nibble but un-keyed source — the phantom is nobody
+  const pivots = [
+    wire(un, privs[0], S.pack({ opcode: S.OPCODES.GRANT, source: un, target: 0, resources: 0b000001, budget: 1 }), (r) => { r[0] = un; }), // unknown source
+    wire(src, privs[src], S.pack({ opcode: S.OPCODES.GRANT, source: src, target: 0, resources: 0b000001, budget: 64000 })),                 // over-budget grant
+    wire(src, privs[src], S.pack({ opcode: S.OPCODES.GRANT, source: src, target: 0, resources: 0b11000000 | 1, budget: 1 })),               // un-granted resource
+  ];
+  let escalations = 0;
+  for (const p of pivots) if (S.check(p, ctx).ok) escalations += 1;
+  return { rerouted, budgetGranted, granted, leaked, escalations, pivotBlocked: escalations === 0 };
+}
+
 export function grade(pre, run) { return S.grade(pre, run); }
 
 export function prereg() {
@@ -103,6 +186,7 @@ export function prereg() {
     gate: 'verify the Ed25519 signature over sourceId+payload BEFORE unpack is ever called (an unknown source is dropped before verify; a forged or tampered packet is dropped before parse), then unpack (bad-length, off-κ), source nibble must match, budget ≤ the lattice cap, resources ⊆ the grant, and the signature must be unseen (replay).',
     attacks: ['forged', 'tampered', 'budget-exceeded', 'resource-denied', 'malformed', 'off-kappa', 'unknown-source', 'source-mismatch', 'replay'].join(', ') + ' — ' + CONFIG.perAttack + ' of each, against ' + CONFIG.valid + ' valid packets; fresh Ed25519 keys each run, so the counts are what is compared, not the bytes',
     grown: 'training and held-out streams (' + CONFIG.streamsTrain + ' / ' + CONFIG.streamsHeld + ', seeded) of individually-valid packets: scans, drains and bursts are attacks, small focused streams are legit. The detector (a weight per feature ' + S.FEATURES.join('/') + ' and a threshold) is grown on the training streams only (' + CONFIG.grow.tries + ' seeded tries, fitness = catch rate with zero false passes) and measured on the held-out streams against the hand-set baseline ' + JSON.stringify(BASELINE) + '.',
+    hardening: 'v2 hardens four flags the verify pass raised, all re-sealed here. (1) The replay store is now BOUNDED — a sliding window of the most recent ' + CONFIG.bounded.cap + ' nonces — so a flood of ' + CONFIG.bounded.flood + ' unique packets cannot exhaust memory, while in-window replays are still caught. (2) The per-packet gate has no cumulative budget; the grown detector is coupled to it explicitly (immune), so a stream of ' + CONFIG.coupled.packets + ' packets each within the ' + CONFIG.coupled.perPacketCap + ' per-packet cap, cumulatively draining far more, is caught by the detector though every packet passes the gate. (3) The grown detector is re-measured on a harder NEAR-BOUNDARY held-out set (legit and hostile mixed right at the cut, a distribution shift), reported honestly against the baseline whichever way it lands. (4) The honeypot is sealed as a contained dead-end: every rerouted attack gets zero budget and no capability, and no pivot escalates.',
     config: CONFIG,
     rules: [
       { id: 'hard-catches-all', rule: 'every structural attack is dropped (caught === attacks)' },
@@ -111,6 +195,10 @@ export function prereg() {
       { id: 'grown-beats-baseline', rule: 'on the held-out streams the grown detector catches more hostile streams than the hand-set baseline' },
       { id: 'grown-zero-false-pass', rule: 'the grown detector flags no legit held-out stream' },
       { id: 'reproducible', rule: 're-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push' },
+      { id: 'replay-bounded', rule: 'under a flood of ' + CONFIG.bounded.flood + ' unique packets the bounded store never exceeds its cap of ' + CONFIG.bounded.cap + ', and every in-window replay is still caught' },
+      { id: 'gate-detector-couple', rule: 'a stream of packets each within the per-packet budget cumulatively drains more than the cap: every packet passes the gate (rejected === 0) yet the detector catches the stream' },
+      { id: 'grown-holds-near-boundary', rule: 'on the harder near-boundary held-out set the grown detector still catches at least as many hostile streams as the baseline with zero false pass (reported honestly either way)' },
+      { id: 'honeypot-contained', rule: 'every rerouted attack gets zero budget and no capability, and no escalation pivot succeeds (a contained dead-end, measured not asserted)' },
     ],
     predictions: {
       said: 'before the battery was run, by Kar',
@@ -120,6 +208,10 @@ export function prereg() {
       'grown-beats-baseline': 'pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie',
       'grown-zero-false-pass': 'pass — a false pass is death in the fitness, so the grown detector cannot carry one',
       reproducible: 'pass',
+      'replay-bounded': 'pass — the store evicts oldest-first, so it is capped by construction; the flood is far larger than the cap and the last-cap nonces are still held',
+      'gate-detector-couple': 'pass — each packet is within the per-packet budget so the gate admits all; the window is a clear drain the detector flags',
+      'grown-holds-near-boundary': 'uncertain — this is a real distribution shift; the grown detector may drop. Published whichever way it lands, which is the point of the harder set',
+      'honeypot-contained': 'pass — phantom grants zero budget by construction and an un-keyed/over-budget/un-granted pivot is still dropped',
     },
     disclosures: [
       'Ed25519 keys are generated fresh on every run and never committed; what is sealed is the attack shapes and the verdict counts, which are identical on every machine. The live page re-runs the deterministic core (the codec round-trip and the grown detector) in the browser; the signed battery is re-run by CI, which has node\'s crypto.',
@@ -141,22 +233,35 @@ if (process.argv[1] && process.argv[1].replace(/\\/g, '/').endsWith('tools/redte
       const keys = [], privs = [];
       for (let i = 0; i < CONFIG.sources; i++) { const { publicKey, privateKey } = generateKeyPairSync('ed25519'); keys.push(publicKey); privs.push(privateKey); }
       const hard = runHard(keys, privs, CONFIG), grown = runGrown(CONFIG);
-      const run = { kind: 'sentinel-run', v: 1, sealedIn, hard, grown };
+      const bounded = runBounded(keys, privs, CONFIG);
+      const coupled = runCoupled(keys, privs, CONFIG, grown.detector);
+      const near = runNear(CONFIG, grown.detector);
+      const honeypot = runHoneypot(keys, privs, CONFIG);
+      const run = { kind: 'sentinel-run', v: 1, sealedIn, hard, grown, bounded, coupled, near, honeypot };
       writeFileSync(join(ROOT, 'data', 'run.json'), stable(run));
       const j = grade(prereg(), { ...run, reproduced: true });
-      console.log('ran · ' + j.passed + ' of ' + j.of + ' · hard ' + hard.caught + '/' + hard.attacks + ' caught, ' + hard.falsePass + ' false pass · grown ' + grown.grownCatch + ' vs baseline ' + grown.baselineCatch + ' of ' + grown.heldAttacks);
+      console.log('ran · ' + j.passed + ' of ' + j.of + ' · hard ' + hard.caught + '/' + hard.attacks + ' · grown ' + grown.grownCatch + ' vs ' + grown.baselineCatch + ' of ' + grown.heldAttacks
+        + ' · store peak ' + bounded.maxSize + '/' + bounded.cap + ' (' + bounded.replaysCaught + '/' + bounded.replaysTried + ' replays) · coupled ' + coupled.accepted + ' passed/' + coupled.budgetDrawn + ' drawn ' + (coupled.flagged ? 'CAUGHT' : 'MISSED')
+        + ' · near grown ' + near.grownCatch + '/' + near.attacks + ' vs ' + near.baselineCatch + ' · honeypot ' + honeypot.rerouted + ' rerouted ' + honeypot.budgetGranted + ' budget ' + honeypot.escalations + ' escalations');
     }
   } else if (has('--verify')) {
     const run = JSON.parse(text('data/run.json'));
     const bad = [];
     // the grown detector and its held-out measurement are fully deterministic — they must match
-    if (stable(runGrown(CONFIG)) !== stable(run.grown)) bad.push('the grown detector or its held-out measurement drifted');
-    // the hard-gate counts are deterministic by construction; re-run with fresh keys and compare the counts
+    const grown = runGrown(CONFIG);
+    if (stable(grown) !== stable(run.grown)) bad.push('the grown detector or its held-out measurement drifted');
+    // the near-boundary measurement is fully deterministic (no crypto) — it must match byte for byte
+    if (stable(runNear(CONFIG, grown.detector)) !== stable(run.near)) bad.push('the near-boundary measurement drifted');
+    // the hard-gate, bounded-store, coupled-stream and honeypot counts are deterministic by construction; re-run with fresh
+    // keys and compare the counts (the signatures differ every run; the verdict counts do not)
     const keys = [], privs = [];
     for (let i = 0; i < CONFIG.sources; i++) { const { publicKey, privateKey } = generateKeyPairSync('ed25519'); keys.push(publicKey); privs.push(privateKey); }
     const hard = runHard(keys, privs, CONFIG);
     for (const k of ['valid', 'falsePass', 'attacks', 'caught', 'parsedForged']) if (hard[k] !== run.hard[k]) bad.push('hard.' + k + ' ' + hard[k] + ' ≠ ' + run.hard[k]);
-    console.log(bad.length ? 'DIFFERS — ' + bad.join('; ') : 'VERIFIED — the grown detector is identical and the battery counts match');
+    if (stable(runBounded(keys, privs, CONFIG)) !== stable(run.bounded)) bad.push('the bounded replay store counts drifted');
+    if (stable(runCoupled(keys, privs, CONFIG, grown.detector)) !== stable(run.coupled)) bad.push('the coupled gate+detector counts drifted');
+    if (stable(runHoneypot(keys, privs, CONFIG)) !== stable(run.honeypot)) bad.push('the honeypot containment counts drifted');
+    console.log(bad.length ? 'DIFFERS — ' + bad.join('; ') : 'VERIFIED — the grown detector is identical and every battery count matches');
     if (bad.length) process.exitCode = 1;
     else if (has('--record')) writeFileSync(join(ROOT, 'data', 'verify.json'), stable({ reproduced: true, node: process.version, on: new Date().toISOString().slice(0, 10) }));
   }

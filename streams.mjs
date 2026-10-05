@@ -27,3 +27,32 @@ export function streams(cfg, seed, n) {
   }
   return out;
 }
+
+// NEAR-BOUNDARY streams — the hard case, deliberately at the cut. The plain `streams` above split cleanly: attacks were big,
+// legit was small, and a detector could learn a fat margin. Real traffic is not clean. Here legit is pushed up to the edge of
+// hostile (a few more packets, a wider reach, a bigger single draw — but still a focused, honest burst) and hostile is pulled
+// down to the edge of legit (a scan just over the line, a drain only just over a legit draw, a burst at its floor). A detector
+// grown on the clean split is measured here for real generalization under distribution shift, not an easy margin. Same seeded
+// shape as `streams`, so the browser and CI see the identical set.
+export function nearBoundary(cfg, seed, n) {
+  const sources = (cfg && cfg.sources) || 4;
+  const r = rng(seed);
+  const d = (k) => Math.floor(r() * k);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const attack = d(2) === 0;
+    const w = [];
+    const src = d(sources);
+    if (attack) {
+      const shape = d(3);
+      if (shape === 0) { const m = 6; for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 1 << d(2), budget: 1 + d(40) }); }          // scan at its floor: just six targets, small budgets
+      else if (shape === 1) { const m = 1 + d(2); for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 1 << d(3), budget: 300 + d(200) }); } // drain only just over a legit draw
+      else { const m = 9 + d(3); for (let k = 0; k < m; k++) w.push({ source: src, target: d(4), resources: 1 << d(2), budget: 1 + d(30) }); }                     // burst just over the legit packet count
+    } else {
+      const m = 3 + d(3); const tgt = d(16);                                                                                                                      // a big-but-honest legit stream: 3–5 packets, a couple of targets, a decent single draw
+      for (let k = 0; k < m; k++) w.push({ source: src, target: (tgt + d(3)) % 16, resources: 1 << d(2), budget: 1 + d(220) });
+    }
+    out.push({ attack, window: w });
+  }
+  return out;
+}

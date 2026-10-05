@@ -225,19 +225,55 @@ test('grow: the fittest detector over a seeded search, deterministic, never on t
   assert.deepEqual(S.grow([], { tries: 0 }, 1), { weights: [0, 0, 0, 0, 0], threshold: 0 }, 'no tries at all is the zero detector');
 });
 
-test('grade: the six sealed rules from a run record', () => {
-  const run = { hard: { caught: 50, attacks: 50, falsePass: 0, valid: 20, parsedForged: 0 }, grown: { grownCatch: 8, baselineCatch: 5, grownFalsePass: false }, reproduced: true };
+test('grade: the ten sealed rules from a run record', () => {
+  const run = {
+    hard: { caught: 50, attacks: 50, falsePass: 0, valid: 20, parsedForged: 0 },
+    grown: { grownCatch: 8, baselineCatch: 5, grownFalsePass: false },
+    bounded: { flood: 400, cap: 64, maxSize: 64, replaysTried: 64, replaysCaught: 64 },
+    coupled: { total: 20, accepted: 20, rejected: 0, budgetDrawn: 59810, flagged: true, perPacketCap: 3000 },
+    near: { attacks: 30, grownCatch: 20, baselineCatch: 15, grownFalsePass: false, sweepBest: 25 },
+    honeypot: { rerouted: 72, budgetGranted: 0, granted: 0, escalations: 0, pivotBlocked: true },
+    reproduced: true,
+  };
   const j = S.grade({}, run);
-  assert.equal(j.passed, 6);
-  assert.equal(j.of, 6);
-  assert.deepEqual(j.rules.map((r) => r.id), ['hard-catches-all', 'hard-zero-false-pass', 'verify-before-parse', 'grown-beats-baseline', 'grown-zero-false-pass', 'reproducible']);
-  assert.equal(S.grade({}, { ...run, hard: { ...run.hard, caught: 49 } }).passed, 5);
-  assert.equal(S.grade({}, { ...run, hard: { ...run.hard, attacks: 0, caught: 0 } }).rules.find((r) => r.id === 'hard-catches-all').pass, false, 'catching all of zero attacks proves nothing');
-  assert.equal(S.grade({}, { ...run, hard: { ...run.hard, valid: 0 } }).rules.find((r) => r.id === 'hard-zero-false-pass').pass, false, 'zero valid packets tested proves no clean pass');
-  assert.equal(S.grade({}, { ...run, hard: { ...run.hard, parsedForged: 1 } }).rules.find((r) => r.id === 'verify-before-parse').pass, false);
-  assert.equal(S.grade({}, { ...run, grown: { grownCatch: 5, baselineCatch: 5, grownFalsePass: false } }).rules.find((r) => r.id === 'grown-beats-baseline').pass, false);
-  assert.equal(S.grade({}, { ...run, grown: { ...run.grown, grownFalsePass: true } }).rules.find((r) => r.id === 'grown-zero-false-pass').pass, false);
-  assert.equal(S.grade({}, { ...run, reproduced: false }).rules.find((r) => r.id === 'reproducible').pass, false);
+  assert.equal(j.passed, 10);
+  assert.equal(j.of, 10);
+  assert.deepEqual(j.rules.map((r) => r.id), ['hard-catches-all', 'hard-zero-false-pass', 'verify-before-parse', 'grown-beats-baseline', 'grown-zero-false-pass', 'reproducible', 'replay-bounded', 'gate-detector-couple', 'grown-holds-near-boundary', 'honeypot-contained']);
+  const r = (run2, id) => S.grade({}, run2).rules.find((x) => x.id === id).pass;
+  // the original six
+  assert.equal(S.grade({}, { ...run, hard: { ...run.hard, caught: 49 } }).passed, 9);
+  assert.equal(r({ ...run, hard: { ...run.hard, attacks: 0, caught: 0 } }, 'hard-catches-all'), false, 'catching all of zero attacks proves nothing');
+  assert.equal(r({ ...run, hard: { ...run.hard, valid: 0 } }, 'hard-zero-false-pass'), false, 'zero valid packets tested proves no clean pass');
+  assert.equal(r({ ...run, hard: { ...run.hard, parsedForged: 1 } }, 'verify-before-parse'), false);
+  assert.equal(r({ ...run, grown: { grownCatch: 5, baselineCatch: 5, grownFalsePass: false } }, 'grown-beats-baseline'), false);
+  assert.equal(r({ ...run, grown: { ...run.grown, grownFalsePass: true } }, 'grown-zero-false-pass'), false);
+  assert.equal(r({ ...run, reproduced: false }, 'reproducible'), false);
+  // flag 1 — bounded replay store
+  assert.equal(r(run, 'replay-bounded'), true);
+  assert.equal(r({ ...run, bounded: { ...run.bounded, maxSize: 65 } }, 'replay-bounded'), false, 'the store exceeded its cap');
+  assert.equal(r({ ...run, bounded: { ...run.bounded, flood: 64 } }, 'replay-bounded'), false, 'the flood must be larger than the cap');
+  assert.equal(r({ ...run, bounded: { ...run.bounded, replaysCaught: 63 } }, 'replay-bounded'), false, 'an in-window replay slipped through');
+  assert.equal(r({ ...run, bounded: { ...run.bounded, replaysTried: 0, replaysCaught: 0 } }, 'replay-bounded'), false, 'no replay was even tried');
+  // flag 2 — gate + detector coupled
+  assert.equal(r(run, 'gate-detector-couple'), true);
+  assert.equal(r({ ...run, coupled: { ...run.coupled, rejected: 1 } }, 'gate-detector-couple'), false, 'a packet was rejected by the gate, not all in-budget');
+  assert.equal(r({ ...run, coupled: { ...run.coupled, flagged: false } }, 'gate-detector-couple'), false, 'the detector missed the drain');
+  assert.equal(r({ ...run, coupled: { ...run.coupled, budgetDrawn: 3000 } }, 'gate-detector-couple'), false, 'the cumulative draw did not exceed the per-packet cap');
+  assert.equal(r({ ...run, coupled: { ...run.coupled, budgetDrawn: 3001 } }, 'gate-detector-couple'), true, 'just over the cap is over the cap (strict >)');
+  assert.equal(r({ ...run, coupled: { ...run.coupled, total: 0 } }, 'gate-detector-couple'), false, 'zero packets proves no coupling (strict total > 0)');
+  // flag 3 — near-boundary generalization (honest)
+  assert.equal(r(run, 'grown-holds-near-boundary'), true);
+  assert.equal(r({ ...run, near: { ...run.near, grownCatch: 14 } }, 'grown-holds-near-boundary'), false, 'grown fell below the baseline on the harder set');
+  assert.equal(r({ ...run, near: { ...run.near, grownCatch: 15 } }, 'grown-holds-near-boundary'), true, 'grown tying the baseline still holds (inclusive >=)');
+  assert.equal(r({ ...run, near: { ...run.near, grownFalsePass: true } }, 'grown-holds-near-boundary'), false, 'grown flagged a legit near-boundary stream');
+  assert.equal(r({ ...run, near: { ...run.near, attacks: 0 } }, 'grown-holds-near-boundary'), false, 'no attacks in the set proves nothing');
+  // flag 4 — honeypot contained
+  assert.equal(r(run, 'honeypot-contained'), true);
+  assert.equal(r({ ...run, honeypot: { ...run.honeypot, budgetGranted: 1 } }, 'honeypot-contained'), false, 'the honeypot leaked budget');
+  assert.equal(r({ ...run, honeypot: { ...run.honeypot, granted: 1 } }, 'honeypot-contained'), false, 'the honeypot granted a capability');
+  assert.equal(r({ ...run, honeypot: { ...run.honeypot, escalations: 1 } }, 'honeypot-contained'), false, 'a pivot escalated');
+  assert.equal(r({ ...run, honeypot: { ...run.honeypot, pivotBlocked: false } }, 'honeypot-contained'), false);
+  assert.equal(r({ ...run, honeypot: { ...run.honeypot, rerouted: 0 } }, 'honeypot-contained'), false, 'nothing was rerouted');
   assert.equal(S.grade(null, null).passed, 0);
 });
 
@@ -247,4 +283,95 @@ test('popcount counts the low eight bits', () => {
   assert.equal(S.popcount(0b1011), 3);
   assert.equal(S.popcount(256), 0, 'only the low byte');
   assert.equal(S.popcount(-1), 8);
+});
+
+// ── flag 1: the bounded replay store ─────────────────────────────────────────────────────────────────────────────────
+test('replayStore: a bounded sliding window — capped under a flood, in-window replays still caught', () => {
+  assert.equal(S.replayStore(5).cap, 5);
+  assert.equal(S.replayStore(0).cap, 4096, 'a non-positive cap falls back to the default');
+  assert.equal(S.replayStore(-3).cap, 4096);
+  assert.equal(S.replayStore(1.5).cap, 4096, 'a non-integer cap falls back');
+  const s = S.replayStore(3);
+  assert.equal(s.size, 0);
+  assert.equal(s.has('a'), false);
+  assert.equal(s.add('a'), true);
+  assert.equal(s.has('a'), true);
+  assert.equal(s.add('a'), false, 'a nonce already seen is a no-op');
+  assert.equal(s.add(null), false, 'null is never stored');
+  assert.equal(s.add(undefined), false);
+  assert.equal(s.size, 1);
+  s.add('b'); s.add('c');
+  assert.equal(s.size, 3, 'at the cap');
+  s.add('d'); // evicts 'a', the oldest
+  assert.equal(s.size, 3, 'never exceeds the cap');
+  assert.equal(s.has('a'), false, 'the oldest was evicted');
+  assert.equal(s.has('b'), true);
+  assert.equal(s.has('d'), true);
+  // a flood far beyond the cap stays capped throughout
+  const big = S.replayStore(10);
+  let maxSize = 0;
+  for (let i = 0; i < 1000; i++) { big.add('n' + i); if (big.size > maxSize) maxSize = big.size; }
+  assert.equal(maxSize, 10, 'the store peaks at exactly the cap under a flood of 1000');
+  assert.equal(big.has('n999'), true, 'the most recent is held');
+  assert.equal(big.has('n990'), true, 'everything inside the last cap is held');
+  assert.equal(big.has('n989'), false, 'the window edge: one older than the cap is gone');
+  assert.equal(big.has('n0'), false, 'the oldest is long gone');
+});
+
+test('the gate takes a bounded replay store: a flood stays capped while in-window replays are caught', () => {
+  const { publicKey, privateKey } = identity();
+  const store = S.replayStore(8);
+  const ctx = { keys: { 1: publicKey }, lattice: { 1: { maxBudget: 65535, resources: 0xFF } }, seen: store, verify };
+  const sent = [];
+  let maxSize = 0;
+  for (let i = 0; i < 100; i++) { const raw = wire(1, privateKey, { ...CMD, source: 1, budget: 1 + i }); assert.equal(S.check(raw, ctx).ok, true); sent.push(raw); if (store.size > maxSize) maxSize = store.size; }
+  assert.equal(maxSize, 8, 'the store never exceeds its cap under a flood of 100 unique packets');
+  assert.equal(S.check(sent[99], ctx).reason, 'replay', 'an in-window replay is still caught');
+  assert.equal(S.check(sent[0], ctx).ok, true, 'a packet older than the window is forgotten — the honest sliding-window trade');
+});
+
+test('the gate ignores a seen that is not a store (no has/add), without throwing', () => {
+  const { publicKey, privateKey } = identity();
+  const ctx = { keys: { 1: publicKey }, lattice: { 1: { maxBudget: 200, resources: 0xFF } }, seen: { nope: 1 }, verify };
+  const raw = wire(1, privateKey, CMD);
+  assert.equal(S.check(raw, ctx).ok, true);
+  assert.equal(S.check(raw, ctx).ok, true, 'with no usable store, replay is not tracked — but nothing throws');
+  // a has without an add is not a store either
+  const ctx2 = { keys: { 1: publicKey }, lattice: { 1: { maxBudget: 200, resources: 0xFF } }, seen: { has: () => true }, verify };
+  assert.equal(S.check(wire(1, privateKey, { ...CMD, budget: 7 }), ctx2).ok, true, 'half a store is no store');
+});
+
+// ── flag 2: gate + detector coupled ──────────────────────────────────────────────────────────────────────────────────
+test('immune: the gate and the detector, coupled', () => {
+  const { publicKey, privateKey } = identity();
+  const cap = 3000;
+  const mkCtx = () => ({ keys: { 1: publicKey }, lattice: { 1: { maxBudget: cap, resources: 0xFF } }, seen: new Set(), verify });
+  const drain = (n) => Array.from({ length: n }, (_, i) => wire(1, privateKey, { ...CMD, source: 1, target: i % 16, budget: cap - i }));
+  const flagging = { weights: [4, 0, 1, 0, 0], threshold: 0.5 };
+  const never = { weights: [0, 0, 0, 0, 0], threshold: 99 };
+
+  const r = S.immune(drain(12), mkCtx(), flagging);
+  assert.equal(r.total, 12);
+  assert.equal(r.accepted, 12, 'every packet is within the per-packet budget');
+  assert.equal(r.rejected, 0, 'the gate passes them all');
+  assert.equal(r.budgetDrawn, 12 * cap - (11 * 12) / 2, 'the cumulative draw, far over the per-packet cap');
+  assert.equal(r.flagged, true, 'the detector catches the stream');
+  assert.equal(r.caught, true);
+
+  // all-valid + a detector that never flags → NOT caught: caught truly couples both halves
+  const r2 = S.immune(drain(12), mkCtx(), never);
+  assert.equal(r2.rejected, 0);
+  assert.equal(r2.flagged, false);
+  assert.equal(r2.caught, false, 'the gate passed everything and the detector was silent');
+
+  // a forged packet in the stream → caught by the gate even with a silent detector
+  const mixed = drain(3); mixed.push(wire(1, privateKey, CMD, { tamper: (x) => { x[7] ^= 0xFF; } }));
+  const r3 = S.immune(mixed, mkCtx(), never);
+  assert.equal(r3.accepted, 3);
+  assert.equal(r3.rejected, 1);
+  assert.equal(r3.caught, true, 'a gate rejection alone makes the stream caught');
+
+  // total on garbage, never throws
+  assert.deepEqual(S.immune(null, mkCtx(), flagging), { total: 0, accepted: 0, rejected: 0, budgetDrawn: 0, flagged: false, caught: false });
+  assert.deepEqual(S.immune('x', mkCtx(), never), { total: 0, accepted: 0, rejected: 0, budgetDrawn: 0, flagged: false, caught: false });
 });

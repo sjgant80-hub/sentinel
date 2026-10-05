@@ -23,6 +23,8 @@
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const int = (v) => (Number.isInteger(v) ? v : NaN);
+// a replay store is anything the gate can ask `has` and tell `add` — a plain Set, or the bounded store below.
+const isStore = (s) => s instanceof Set || (isObj(s) && typeof s.has === 'function' && typeof s.add === 'function');
 
 // the prime spine of the fold — one prime per payload byte (the primorial fold; see Thomas Frumkin's codec)
 export const SPINE = [2, 3, 5, 11, 31];
@@ -71,6 +73,28 @@ const hex = (u8) => { let s = ''; for (const b of u8) s += b.toString(16).padSta
 const num = (x) => { const n = Number(x); return Number.isFinite(n) ? n : 0; };
 export function fingerprint(raw) { return raw instanceof Uint8Array && raw.length === WIRE ? hex(raw.subarray(7)) : null; }
 
+// A BOUNDED, sliding-window replay store. An unbounded Set of every nonce ever seen is a memory-exhaustion DoS: an attacker
+// floods unique signed packets and the set grows without limit. This store remembers only the most recent `cap` nonces —
+// a flood can never push it past `cap` (oldest-first eviction, FIFO) — while any replay still inside the window is caught.
+// A packet older than the window is forgotten, so an ancient replay would pass; that is the deliberate sliding-window
+// trade (a production mesh uses monotonic counters), and it is what keeps the memory bounded. Duck-typed to a Set
+// (has/add), so the gate takes either.
+export function replayStore(max) {
+  const cap = Number.isInteger(max) && max > 0 ? max : 4096;
+  const seen = new Map(); // insertion order IS arrival order, so the first key is always the oldest nonce
+  return {
+    cap,
+    get size() { return seen.size; },
+    has(nonce) { return seen.has(nonce); },
+    add(nonce) {
+      if (nonce == null || seen.has(nonce)) return false;
+      seen.set(nonce, 1);
+      if (seen.size > cap) seen.delete(seen.keys().next().value);
+      return true;
+    },
+  };
+}
+
 const reject = (reason) => ({ ok: false, reason, command: null });
 
 // THE GATE. ctx = { keys:{id:publicKey}, lattice:{id:{maxBudget,resources}}, seen:Set, verify:(key,msg,sig)=>boolean }.
@@ -79,7 +103,7 @@ export function check(raw, ctx) {
   const c = isObj(ctx) ? ctx : {};
   const keys = isObj(c.keys) ? c.keys : {};
   const lattice = isObj(c.lattice) ? c.lattice : {};
-  const seen = c.seen instanceof Set ? c.seen : null;
+  const seen = isStore(c.seen) ? c.seen : null;
   const verify = typeof c.verify === 'function' ? c.verify : null;
   if (!(raw instanceof Uint8Array) || raw.length !== WIRE) return reject('bad-length');
   const sourceId = raw[0];
@@ -107,6 +131,24 @@ export function check(raw, ctx) {
 export function phantom(verdict) {
   const reason = isObj(verdict) && typeof verdict.reason === 'string' ? verdict.reason : 'dropped';
   return { phantom: true, granted: false, budget: 0, cell: 'phantom', echo: reason };
+}
+
+// THE COUPLING, made explicit. The per-packet gate (check) has NO cumulative budget: a source can send many packets each
+// within its per-packet grant and still drain far more than any one of them. The gate alone cannot see that. The grown
+// detector over the window of ACCEPTED packets is what covers it. immune runs a whole stream through the gate, then runs
+// the detector over everything the gate let through — so a drain that passes packet-by-packet is still caught by the
+// detector. Gate AND detector together is the immune property; neither alone is the defence.
+export function immune(rawStream, ctx, detector) {
+  const stream = Array.isArray(rawStream) ? rawStream : [];
+  const accepted = [];
+  let rejected = 0;
+  for (const raw of stream) {
+    const v = check(raw, ctx);
+    if (v.ok) accepted.push(v.command); else rejected += 1;
+  }
+  const budgetDrawn = accepted.reduce((s, c) => s + (int(c.budget) || 0), 0);
+  const flagged = flags(accepted, detector);
+  return { total: stream.length, accepted: accepted.length, rejected, budgetDrawn, flagged, caught: flagged || rejected > 0 };
 }
 
 // ── the grown detector: hostile STREAMS of individually-valid packets ───────────────────────────────────────────────
@@ -189,6 +231,10 @@ export function grade(prereg, run) {
   const g = isObj(run) ? run : {};
   const hard = isObj(g.hard) ? g.hard : {};
   const grown = isObj(g.grown) ? g.grown : {};
+  const bounded = isObj(g.bounded) ? g.bounded : {};
+  const coupled = isObj(g.coupled) ? g.coupled : {};
+  const near = isObj(g.near) ? g.near : {};
+  const honey = isObj(g.honeypot) ? g.honeypot : {};
   const rules = [
     { id: 'hard-catches-all', value: hard.caught + ' of ' + hard.attacks + ' structural attacks dropped', pass: hard.attacks > 0 && hard.caught === hard.attacks },
     { id: 'hard-zero-false-pass', value: hard.falsePass + ' valid packets wrongly dropped (of ' + hard.valid + ')', pass: hard.falsePass === 0 && hard.valid > 0 },
@@ -196,8 +242,12 @@ export function grade(prereg, run) {
     { id: 'grown-beats-baseline', value: 'grown caught ' + grown.grownCatch + ', hand-set baseline ' + grown.baselineCatch + ' (held-out)', pass: grown.grownCatch > grown.baselineCatch },
     { id: 'grown-zero-false-pass', value: grown.grownFalsePass ? 'flagged a legit stream' : 'no legit stream flagged', pass: grown.grownFalsePass === false },
     { id: 'reproducible', value: 'CI re-runs the whole battery from the seal', pass: g.reproduced === true },
+    { id: 'replay-bounded', value: 'under ' + bounded.flood + ' unique packets the store peaked at ' + bounded.maxSize + ' of cap ' + bounded.cap + '; ' + bounded.replaysCaught + ' of ' + bounded.replaysTried + ' in-window replays caught', pass: bounded.flood > bounded.cap && bounded.maxSize <= bounded.cap && bounded.replaysTried > 0 && bounded.replaysCaught === bounded.replaysTried },
+    { id: 'gate-detector-couple', value: coupled.accepted + ' of ' + coupled.total + ' packets passed the per-packet gate (cap ' + coupled.perPacketCap + ') drawing ' + coupled.budgetDrawn + ' cumulative; the detector ' + (coupled.flagged ? 'caught' : 'missed') + ' the stream', pass: coupled.total > 0 && coupled.rejected === 0 && coupled.budgetDrawn > coupled.perPacketCap && coupled.flagged === true },
+    { id: 'grown-holds-near-boundary', value: 'near-boundary held-out: grown caught ' + near.grownCatch + ' of ' + near.attacks + ', baseline ' + near.baselineCatch + ' (best grown-weight threshold reaches ' + near.sweepBest + '); ' + (near.grownFalsePass ? 'flagged a legit stream' : 'no legit flagged'), pass: near.attacks > 0 && near.grownCatch >= near.baselineCatch && near.grownFalsePass === false },
+    { id: 'honeypot-contained', value: honey.rerouted + ' rerouted attacks: ' + honey.budgetGranted + ' budget granted, ' + honey.granted + ' grants, ' + honey.escalations + ' escalations', pass: honey.rerouted > 0 && honey.budgetGranted === 0 && honey.granted === 0 && honey.escalations === 0 && honey.pivotBlocked === true },
   ];
   return { rules, passed: rules.filter((r) => r.pass).length, of: rules.length };
 }
 
-export default { SPINE, OPCODES, RESOURCES, WIRE, PAYLOAD, SIG, popcount, foldWitness, pack, unpack, fingerprint, check, phantom, features, FEATURES, normalize, score, flags, rng, fitness, better, grow, grade };
+export default { SPINE, OPCODES, RESOURCES, WIRE, PAYLOAD, SIG, popcount, foldWitness, pack, unpack, fingerprint, replayStore, check, phantom, immune, features, FEATURES, normalize, score, flags, rng, fitness, better, grow, grade };

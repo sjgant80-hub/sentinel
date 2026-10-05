@@ -56,6 +56,17 @@ if (run) {
     + '<tr class="best"><td>grown</td><td class="n">' + g.grownCatch + ' of ' + g.heldAttacks + '</td><td class="n">' + (g.grownFalsePass ? 'yes' : 'none') + '</td></tr>'
     + '<tr><td>hand-set baseline</td><td class="n">' + g.baselineCatch + ' of ' + g.heldAttacks + '</td><td class="n">' + (g.baselineFalsePass ? 'yes' : 'none') + '</td></tr>'
     + '</tbody></table></div><p class="quiet">A false pass — flagging a legit stream — is death in the fitness, so a detector that cries wolf never survives. The grown weights: ' + esc(JSON.stringify(g.detector.weights)) + ', threshold ' + g.detector.threshold + '.</p></div>';
+  const bd = run.bounded, cp = run.coupled, nb = run.near, hp = run.honeypot;
+  if (bd && cp && nb && hp) {
+    const nearLine = nb.grownCatch >= nb.baselineCatch
+      ? 'held up: ' + nb.grownCatch + ' of ' + nb.attacks + ' caught vs the baseline\'s ' + nb.baselineCatch + ', no legit stream flagged'
+      : 'dropped under the shift: ' + nb.grownCatch + ' of ' + nb.attacks + ' vs the baseline\'s ' + nb.baselineCatch + ' — reported, not hidden';
+    body += '<h2>What v2 hardened</h2><div class="card"><p class="quiet" style="margin-top:0">Four flags a verify pass raised, each now sealed and measured, not asserted.</p>'
+      + '<h3>A bounded replay store</h3><p>An unbounded set of every nonce ever seen is a memory-exhaustion DoS. The store is now a sliding window of the most recent <b>' + bd.cap + '</b> nonces. Under a flood of <b>' + bd.flood + '</b> unique packets it peaked at <b>' + bd.maxSize + '</b> — never past the cap — while <b>' + bd.replaysCaught + ' of ' + bd.replaysTried + '</b> in-window replays were still caught. A packet older than the window is forgotten; that trade is what bounds the memory.</p>'
+      + '<h3>Gate and detector, coupled</h3><p>The per-packet gate has no cumulative budget. A stream of <b>' + cp.accepted + '</b> packets each within the per-packet cap of <b>' + cp.perPacketCap + '</b> drew <b>' + cp.budgetDrawn + '</b> cumulatively — ' + Math.round(cp.budgetDrawn / cp.perPacketCap) + '× the cap. Every packet passed the gate; the detector over the accepted window ' + (cp.flagged ? 'caught the drain' : 'MISSED the drain') + '. Gate and detector together, not either alone.</p>'
+      + '<h3>A harder held-out set</h3><p>The clean train/test split gave the detector a fat margin. Re-measured on a near-boundary set — legit and hostile mixed right at the cut, a real distribution shift — the grown detector ' + nearLine + ' (the best any threshold on its weights reaches here is ' + nb.sweepBest + ').</p>'
+      + '<h3>A contained honeypot</h3><p>Every one of the <b>' + hp.rerouted + '</b> rerouted attacks got <b>' + hp.budgetGranted + '</b> budget and <b>' + hp.granted + '</b> capabilities, and <b>' + hp.escalations + '</b> escalation pivots succeeded. A dead-end that is measured to be a dead-end.</p></div>';
+  }
 }
 
 const page = `<!doctype html>

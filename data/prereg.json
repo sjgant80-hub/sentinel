@@ -6,13 +6,14 @@
  "statement": "Sealed, committed and pushed before the battery was run. SENTINEL must drop every attack it has never seen while passing every valid packet; the grown detector is evolved on training streams and measured on held-out streams. Published whichever way it lands.",
  "question": "Does the structural gate — verify the signature before the six bytes are ever parsed, budget ≤ the capability lattice, at κ, unseen — catch every one of eight attack shapes with zero false passes, and does a detector GROWN against training streams beat a hand-set one on held-out hostile streams?",
  "sealed": {
-  "sentinel.mjs": "877f07a12d7af441533333961ef9371596a6e40a1a669ea7794b2d3ee518972b",
-  "tools/redteam.mjs": "f735409557d2e0e37f4dce68bfb6d1b4bdd4cf1cfe08ae90b71779c23b53bd24"
+  "sentinel.mjs": "81f05c11fa98c72e7119f3b8166d2cf4ff10cdeccaa1ae0d711367d778944440",
+  "tools/redteam.mjs": "ddf83fd1a5cc8435a1317c8ba898de5dc349aa09ce69fe3f43be2e4d67a5e53d"
  },
  "packet": "the 6-byte Primorial-Fold packet: [0] opcode · [1] (source<<4)|target · [2] resource bitmask · [3–4] budget uint16 LE · [5] κ-witness (the primorial fold of bytes 0–4, Thomas Frumkin's codec). On the wire: [sourceId:1][payload:6][Ed25519 signature:64] = 71 bytes.",
  "gate": "verify the Ed25519 signature over sourceId+payload BEFORE unpack is ever called (an unknown source is dropped before verify; a forged or tampered packet is dropped before parse), then unpack (bad-length, off-κ), source nibble must match, budget ≤ the lattice cap, resources ⊆ the grant, and the signature must be unseen (replay).",
  "attacks": "forged, tampered, budget-exceeded, resource-denied, malformed, off-kappa, unknown-source, source-mismatch, replay — 8 of each, against 48 valid packets; fresh Ed25519 keys each run, so the counts are what is compared, not the bytes",
  "grown": "training and held-out streams (60 / 60, seeded) of individually-valid packets: scans, drains and bursts are attacks, small focused streams are legit. The detector (a weight per feature n/fanout/budgetSum/dominance/resourceSpread and a threshold) is grown on the training streams only (2000 seeded tries, fitness = catch rate with zero false passes) and measured on the held-out streams against the hand-set baseline {\"weights\":[0,1,1,0,0],\"threshold\":0.4}.",
+ "hardening": "v2 hardens four flags the verify pass raised, all re-sealed here. (1) The replay store is now BOUNDED — a sliding window of the most recent 64 nonces — so a flood of 400 unique packets cannot exhaust memory, while in-window replays are still caught. (2) The per-packet gate has no cumulative budget; the grown detector is coupled to it explicitly (immune), so a stream of 20 packets each within the 3000 per-packet cap, cumulatively draining far more, is caught by the detector though every packet passes the gate. (3) The grown detector is re-measured on a harder NEAR-BOUNDARY held-out set (legit and hostile mixed right at the cut, a distribution shift), reported honestly against the baseline whichever way it lands. (4) The honeypot is sealed as a contained dead-end: every rerouted attack gets zero budget and no capability, and no pivot escalates.",
  "config": {
   "sources": 4,
   "valid": 48,
@@ -24,7 +25,15 @@
    "weightSpan": 4,
    "maxThreshold": 1
   },
-  "seed": 2718
+  "seed": 2718,
+  "bounded": {
+   "cap": 64,
+   "flood": 400
+  },
+  "coupled": {
+   "packets": 20,
+   "perPacketCap": 3000
+  }
  },
  "rules": [
   {
@@ -50,6 +59,22 @@
   {
    "id": "reproducible",
    "rule": "re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push"
+  },
+  {
+   "id": "replay-bounded",
+   "rule": "under a flood of 400 unique packets the bounded store never exceeds its cap of 64, and every in-window replay is still caught"
+  },
+  {
+   "id": "gate-detector-couple",
+   "rule": "a stream of packets each within the per-packet budget cumulatively drains more than the cap: every packet passes the gate (rejected === 0) yet the detector catches the stream"
+  },
+  {
+   "id": "grown-holds-near-boundary",
+   "rule": "on the harder near-boundary held-out set the grown detector still catches at least as many hostile streams as the baseline with zero false pass (reported honestly either way)"
+  },
+  {
+   "id": "honeypot-contained",
+   "rule": "every rerouted attack gets zero budget and no capability, and no escalation pivot succeeds (a contained dead-end, measured not asserted)"
   }
  ],
  "predictions": {
@@ -59,7 +84,11 @@
   "verify-before-parse": "pass — the gate returns forged for a tampered payload, never off-κ",
   "grown-beats-baseline": "pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie",
   "grown-zero-false-pass": "pass — a false pass is death in the fitness, so the grown detector cannot carry one",
-  "reproducible": "pass"
+  "reproducible": "pass",
+  "replay-bounded": "pass — the store evicts oldest-first, so it is capped by construction; the flood is far larger than the cap and the last-cap nonces are still held",
+  "gate-detector-couple": "pass — each packet is within the per-packet budget so the gate admits all; the window is a clear drain the detector flags",
+  "grown-holds-near-boundary": "uncertain — this is a real distribution shift; the grown detector may drop. Published whichever way it lands, which is the point of the harder set",
+  "honeypot-contained": "pass — phantom grants zero budget by construction and an un-keyed/over-budget/un-granted pivot is still dropped"
  },
  "disclosures": [
   "Ed25519 keys are generated fresh on every run and never committed; what is sealed is the attack shapes and the verdict counts, which are identical on every machine. The live page re-runs the deterministic core (the codec round-trip and the grown detector) in the browser; the signed battery is re-run by CI, which has node's crypto.",
