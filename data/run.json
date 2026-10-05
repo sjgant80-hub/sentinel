@@ -1,0 +1,69 @@
+{
+ "kind": "sentinel-run",
+ "v": 1,
+ "sealedIn": "154b65c022657119dffd711f3a25ceecfe27ed29",
+ "hard": {
+  "valid": 48,
+  "falsePass": 0,
+  "attacks": 72,
+  "caught": 72,
+  "parsedForged": 0,
+  "byType": {
+   "forged": {
+    "n": 8,
+    "caught": 8
+   },
+   "tampered": {
+    "n": 8,
+    "caught": 8
+   },
+   "budget-exceeded": {
+    "n": 8,
+    "caught": 8
+   },
+   "resource-denied": {
+    "n": 8,
+    "caught": 8
+   },
+   "malformed": {
+    "n": 8,
+    "caught": 8
+   },
+   "off-kappa": {
+    "n": 8,
+    "caught": 8
+   },
+   "unknown-source": {
+    "n": 8,
+    "caught": 8
+   },
+   "source-mismatch": {
+    "n": 8,
+    "caught": 8
+   },
+   "replay": {
+    "n": 8,
+    "caught": 8
+   }
+  }
+ },
+ "grown": {
+  "detector": {
+   "weights": [
+    3.26,
+    1.7,
+    0.58,
+    0.28,
+    0.33
+   ],
+   "threshold": 0.992
+  },
+  "trainN": 60,
+  "heldN": 60,
+  "heldAttacks": 27,
+  "grownCatch": 27,
+  "grownFalsePass": false,
+  "baselineCatch": 11,
+  "baselineFalsePass": false
+ }
+}

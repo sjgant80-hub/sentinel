@@ -6,7 +6,16 @@ A structural immune system. A command that is not signed, not within its capabil
 
 ## The result
 
-Sealed, being measured. The packet, the gate, the attack shapes, the rules and a prediction were committed before the battery ran; the result lands here whichever way it goes.
+5 of 6 sealed rules held. The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.
+
+| Sealed rule | Result | | Predicted |
+|---|---|---|---|
+| every structural attack is dropped (caught === attacks) | 72 of 72 structural attacks dropped | PASS | pass — the gate is correct by construction, but this proves there is no hole left open |
+| no valid packet is dropped (falsePass === 0, valid > 0) | 0 valid packets wrongly dropped (of 48) | PASS | pass |
+| no forged or tampered packet is ever parsed — each is judged forged, a verdict only the signature check can reach (parsedForged === 0) | 0 forged packets ever reached unpack | PASS | pass — the gate returns forged for a tampered payload, never off-κ |
+| on the held-out streams the grown detector catches more hostile streams than the hand-set baseline | grown caught 27, hand-set baseline 11 (held-out) | PASS | pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie |
+| the grown detector flags no legit held-out stream | no legit stream flagged | PASS | pass — a false pass is death in the fitness, so the grown detector cannot carry one |
+| re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push | CI re-runs the whole battery from the seal | FAIL | pass |
 
 ## What it is
 

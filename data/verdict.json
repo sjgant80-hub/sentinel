@@ -1,0 +1,88 @@
+{
+ "kind": "sentinel-verdict",
+ "sealedIn": "154b65c022657119dffd711f3a25ceecfe27ed29",
+ "passed": 5,
+ "of": 6,
+ "rules": [
+  {
+   "id": "hard-catches-all",
+   "pass": true,
+   "value": "72 of 72 structural attacks dropped"
+  },
+  {
+   "id": "hard-zero-false-pass",
+   "pass": true,
+   "value": "0 valid packets wrongly dropped (of 48)"
+  },
+  {
+   "id": "verify-before-parse",
+   "pass": true,
+   "value": "0 forged packets ever reached unpack"
+  },
+  {
+   "id": "grown-beats-baseline",
+   "pass": true,
+   "value": "grown caught 27, hand-set baseline 11 (held-out)"
+  },
+  {
+   "id": "grown-zero-false-pass",
+   "pass": true,
+   "value": "no legit stream flagged"
+  },
+  {
+   "id": "reproducible",
+   "pass": false,
+   "value": "CI re-runs the whole battery from the seal"
+  }
+ ],
+ "hard": {
+  "valid": 48,
+  "falsePass": 0,
+  "attacks": 72,
+  "caught": 72,
+  "parsedForged": 0,
+  "byType": {
+   "forged": {
+    "n": 8,
+    "caught": 8
+   },
+   "tampered": {
+    "n": 8,
+    "caught": 8
+   },
+   "budget-exceeded": {
+    "n": 8,
+    "caught": 8
+   },
+   "resource-denied": {
+    "n": 8,
+    "caught": 8
+   },
+   "malformed": {
+    "n": 8,
+    "caught": 8
+   },
+   "off-kappa": {
+    "n": 8,
+    "caught": 8
+   },
+   "unknown-source": {
+    "n": 8,
+    "caught": 8
+   },
+   "source-mismatch": {
+    "n": 8,
+    "caught": 8
+   },
+   "replay": {
+    "n": 8,
+    "caught": 8
+   }
+  }
+ },
+ "grown": {
+  "grownCatch": 27,
+  "baselineCatch": 11,
+  "heldAttacks": 27
+ }
+}
