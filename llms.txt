@@ -2,7 +2,7 @@
 
 > A structural immune system: a verify-before-parse signed-packet gate, a capability budget, a κ-witness, and a grown anomaly detector, sealed against a red-team battery.
 
-5 of 6 sealed rules held. The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.
+6 of 6 sealed rules held. The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.
 
 ## Key pages
 

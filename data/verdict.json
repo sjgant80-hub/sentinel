@@ -1,7 +1,7 @@
 {
  "kind": "sentinel-verdict",
  "sealedIn": "154b65c022657119dffd711f3a25ceecfe27ed29",
- "passed": 5,
+ "passed": 6,
  "of": 6,
  "rules": [
   {
@@ -31,7 +31,7 @@
   },
   {
    "id": "reproducible",
-   "pass": false,
+   "pass": true,
    "value": "CI re-runs the whole battery from the seal"
   }
  ],

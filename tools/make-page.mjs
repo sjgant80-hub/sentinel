@@ -16,7 +16,7 @@ const CREDIT = 'Powered by the Konomi architecture, created by Thomas Frumkin';
 
 const pre = json('data/prereg.json'), run = json('data/run.json'), ver = json('data/verify.json');
 if (!pre) { console.error('not sealed — run tools/redteam.mjs --seal first'); process.exit(1); }
-const j = run && grade(pre, { ...run, reproduced: !!(ver && ver.verified) });
+const j = run && grade(pre, { ...run, reproduced: !!(ver && ver.reproduced) });
 
 const headline = !run
   ? 'Sealed, being measured. The packet, the gate, the attack shapes, the rules and a prediction were committed before the battery ran; the result lands here whichever way it goes.'
