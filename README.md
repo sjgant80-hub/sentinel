@@ -6,7 +6,7 @@ A structural immune system. A command that is not signed, not within its capabil
 
 ## The result
 
-6 of 6 sealed rules held. The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.
+9 of 10 sealed rules held. The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.
 
 | Sealed rule | Result | | Predicted |
 |---|---|---|---|
@@ -16,6 +16,10 @@ A structural immune system. A command that is not signed, not within its capabil
 | on the held-out streams the grown detector catches more hostile streams than the hand-set baseline | grown caught 27, hand-set baseline 11 (held-out) | PASS | pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie |
 | the grown detector flags no legit held-out stream | no legit stream flagged | PASS | pass — a false pass is death in the fitness, so the grown detector cannot carry one |
 | re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push | CI re-runs the whole battery from the seal | PASS | pass |
+| under a flood of 400 unique packets the bounded store never exceeds its cap of 64, and every in-window replay is still caught | under 400 unique packets the store peaked at 64 of cap 64; 64 of 64 in-window replays caught | PASS | pass — the store evicts oldest-first, so it is capped by construction; the flood is far larger than the cap and the last-cap nonces are still held |
+| a stream of packets each within the per-packet budget cumulatively drains more than the cap: every packet passes the gate (rejected === 0) yet the detector catches the stream | 20 of 20 packets passed the per-packet gate (cap 3000) drawing 59810 cumulative; the detector caught the stream | PASS | pass — each packet is within the per-packet budget so the gate admits all; the window is a clear drain the detector flags |
+| on the harder near-boundary held-out set the grown detector still catches at least as many hostile streams as the baseline with zero false pass (reported honestly either way) | near-boundary held-out: grown caught 0 of 32, baseline 0 (best grown-weight threshold reaches 20); flagged a legit stream | FAIL | uncertain — this is a real distribution shift; the grown detector may drop. Published whichever way it lands, which is the point of the harder set |
+| every rerouted attack gets zero budget and no capability, and no escalation pivot succeeds (a contained dead-end, measured not asserted) | 72 rerouted attacks: 0 budget granted, 0 grants, 0 escalations | PASS | pass — phantom grants zero budget by construction and an un-keyed/over-budget/un-granted pivot is still dropped |
 
 ## What it is
 

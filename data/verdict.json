@@ -1,8 +1,8 @@
 {
  "kind": "sentinel-verdict",
- "sealedIn": "154b65c022657119dffd711f3a25ceecfe27ed29",
- "passed": 6,
- "of": 6,
+ "sealedIn": "8bd5e5007a123883eae18d974a2fd7d19137a147",
+ "passed": 9,
+ "of": 10,
  "rules": [
   {
    "id": "hard-catches-all",
@@ -33,6 +33,26 @@
    "id": "reproducible",
    "pass": true,
    "value": "CI re-runs the whole battery from the seal"
+  },
+  {
+   "id": "replay-bounded",
+   "pass": true,
+   "value": "under 400 unique packets the store peaked at 64 of cap 64; 64 of 64 in-window replays caught"
+  },
+  {
+   "id": "gate-detector-couple",
+   "pass": true,
+   "value": "20 of 20 packets passed the per-packet gate (cap 3000) drawing 59810 cumulative; the detector caught the stream"
+  },
+  {
+   "id": "grown-holds-near-boundary",
+   "pass": false,
+   "value": "near-boundary held-out: grown caught 0 of 32, baseline 0 (best grown-weight threshold reaches 20); flagged a legit stream"
+  },
+  {
+   "id": "honeypot-contained",
+   "pass": true,
+   "value": "72 rerouted attacks: 0 budget granted, 0 grants, 0 escalations"
   }
  ],
  "hard": {

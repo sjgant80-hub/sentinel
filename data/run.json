@@ -1,7 +1,7 @@
 {
  "kind": "sentinel-run",
  "v": 1,
- "sealedIn": "154b65c022657119dffd711f3a25ceecfe27ed29",
+ "sealedIn": "8bd5e5007a123883eae18d974a2fd7d19137a147",
  "hard": {
   "valid": 48,
   "falsePass": 0,
@@ -65,5 +65,39 @@
   "grownFalsePass": false,
   "baselineCatch": 11,
   "baselineFalsePass": false
+ },
+ "bounded": {
+  "cap": 64,
+  "flood": 400,
+  "accepted": 400,
+  "maxSize": 64,
+  "replaysTried": 64,
+  "replaysCaught": 64,
+  "evictedReplayCaught": false
+ },
+ "coupled": {
+  "total": 20,
+  "accepted": 20,
+  "rejected": 0,
+  "budgetDrawn": 59810,
+  "flagged": true,
+  "perPacketCap": 3000
+ },
+ "near": {
+  "attacks": 32,
+  "grownCatch": 0,
+  "grownFalsePass": true,
+  "baselineCatch": 0,
+  "baselineFalsePass": false,
+  "sweepBest": 20,
+  "sweepThreshold": 1.2
+ },
+ "honeypot": {
+  "rerouted": 72,
+  "budgetGranted": 0,
+  "granted": 0,
+  "leaked": 0,
+  "escalations": 0,
+  "pivotBlocked": true
  }
 }

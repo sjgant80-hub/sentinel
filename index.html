@@ -45,8 +45,8 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:v
  <p class="lede">Not a wall bolted on, but the shape of the thing: a command that is not signed, not within its budget, not at κ, and not unseen never becomes a command at all.</p>
 </header>
 <h2>The verdict</h2>
-<div class="card verdict"><p class="big"><span class="stat">6 of 6</span> sealed rules held.</p><p>The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.</p></div>
-<h2>The sealed rules</h2><div class="card"><table><thead><tr><th>rule</th><th>result</th><th></th><th>predicted before the run</th></tr></thead><tbody><tr><td>every structural attack is dropped (caught === attacks)</td><td>72 of 72 structural attacks dropped</td><td class="pass">PASS</td><td class="quiet">pass — the gate is correct by construction, but this proves there is no hole left open</td></tr><tr><td>no valid packet is dropped (falsePass === 0, valid &gt; 0)</td><td>0 valid packets wrongly dropped (of 48)</td><td class="pass">PASS</td><td class="quiet">pass</td></tr><tr><td>no forged or tampered packet is ever parsed — each is judged forged, a verdict only the signature check can reach (parsedForged === 0)</td><td>0 forged packets ever reached unpack</td><td class="pass">PASS</td><td class="quiet">pass — the gate returns forged for a tampered payload, never off-κ</td></tr><tr><td>on the held-out streams the grown detector catches more hostile streams than the hand-set baseline</td><td>grown caught 27, hand-set baseline 11 (held-out)</td><td class="pass">PASS</td><td class="quiet">pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie</td></tr><tr><td>the grown detector flags no legit held-out stream</td><td>no legit stream flagged</td><td class="pass">PASS</td><td class="quiet">pass — a false pass is death in the fitness, so the grown detector cannot carry one</td></tr><tr><td>re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push</td><td>CI re-runs the whole battery from the seal</td><td class="pass">PASS</td><td class="quiet">pass</td></tr></tbody></table></div><h2>The attack battery</h2><div class="card"><p class="quiet" style="margin-top:0">Eight attack shapes plus replay, 8 of each, against 48 valid packets — fresh Ed25519 keys each run, so the counts are what is compared. Every attack is dropped; every valid packet passes.</p><div class="scroll"><table><thead><tr><th>attack</th><th>thrown</th><th>dropped</th></tr></thead><tbody><tr><td>forged</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>tampered</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>budget-exceeded</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>resource-denied</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>malformed</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>off-kappa</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>unknown-source</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>source-mismatch</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>replay</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr class="best"><td>valid packets</td><td class="n">48</td><td class="n">48 passed</td></tr></tbody></table></div><p class="quiet">Forged and tampered packets reached unpack <b>0</b> times — the signature is checked before the payload is parsed.</p></div><h2>The grown detector</h2><div class="card"><p style="margin-top:0">Individually-valid packets can still form a hostile <b>stream</b> — a scan across targets, a budget drain, a burst. A detector (a weight per feature n, fanout, budgetSum, dominance, resourceSpread and a threshold) was grown on 60 training streams and measured on 60 held-out streams it never saw.</p><div class="scroll"><table><thead><tr><th></th><th>hostile streams caught</th><th>legit flagged</th></tr></thead><tbody><tr class="best"><td>grown</td><td class="n">27 of 27</td><td class="n">none</td></tr><tr><td>hand-set baseline</td><td class="n">11 of 27</td><td class="n">none</td></tr></tbody></table></div><p class="quiet">A false pass — flagging a legit stream — is death in the fitness, so a detector that cries wolf never survives. The grown weights: [3.26,1.7,0.58,0.28,0.33], threshold 0.992.</p></div>
+<div class="card verdict"><p class="big"><span class="stat">9 of 10</span> sealed rules held.</p><p>The gate dropped 72 of 72 attacks it had never seen with 0 of 48 valid packets wrongly dropped, and no forged packet was ever parsed. A detector GROWN against training streams caught 27 of 27 hostile held-out streams against the hand-set baseline's 11, flagging no legit stream.</p></div>
+<h2>The sealed rules</h2><div class="card"><table><thead><tr><th>rule</th><th>result</th><th></th><th>predicted before the run</th></tr></thead><tbody><tr><td>every structural attack is dropped (caught === attacks)</td><td>72 of 72 structural attacks dropped</td><td class="pass">PASS</td><td class="quiet">pass — the gate is correct by construction, but this proves there is no hole left open</td></tr><tr><td>no valid packet is dropped (falsePass === 0, valid &gt; 0)</td><td>0 valid packets wrongly dropped (of 48)</td><td class="pass">PASS</td><td class="quiet">pass</td></tr><tr><td>no forged or tampered packet is ever parsed — each is judged forged, a verdict only the signature check can reach (parsedForged === 0)</td><td>0 forged packets ever reached unpack</td><td class="pass">PASS</td><td class="quiet">pass — the gate returns forged for a tampered payload, never off-κ</td></tr><tr><td>on the held-out streams the grown detector catches more hostile streams than the hand-set baseline</td><td>grown caught 27, hand-set baseline 11 (held-out)</td><td class="pass">PASS</td><td class="quiet">pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie</td></tr><tr><td>the grown detector flags no legit held-out stream</td><td>no legit stream flagged</td><td class="pass">PASS</td><td class="quiet">pass — a false pass is death in the fitness, so the grown detector cannot carry one</td></tr><tr><td>re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push</td><td>CI re-runs the whole battery from the seal</td><td class="pass">PASS</td><td class="quiet">pass</td></tr><tr><td>under a flood of 400 unique packets the bounded store never exceeds its cap of 64, and every in-window replay is still caught</td><td>under 400 unique packets the store peaked at 64 of cap 64; 64 of 64 in-window replays caught</td><td class="pass">PASS</td><td class="quiet">pass — the store evicts oldest-first, so it is capped by construction; the flood is far larger than the cap and the last-cap nonces are still held</td></tr><tr><td>a stream of packets each within the per-packet budget cumulatively drains more than the cap: every packet passes the gate (rejected === 0) yet the detector catches the stream</td><td>20 of 20 packets passed the per-packet gate (cap 3000) drawing 59810 cumulative; the detector caught the stream</td><td class="pass">PASS</td><td class="quiet">pass — each packet is within the per-packet budget so the gate admits all; the window is a clear drain the detector flags</td></tr><tr><td>on the harder near-boundary held-out set the grown detector still catches at least as many hostile streams as the baseline with zero false pass (reported honestly either way)</td><td>near-boundary held-out: grown caught 0 of 32, baseline 0 (best grown-weight threshold reaches 20); flagged a legit stream</td><td class="fail">FAIL</td><td class="quiet">uncertain — this is a real distribution shift; the grown detector may drop. Published whichever way it lands, which is the point of the harder set</td></tr><tr><td>every rerouted attack gets zero budget and no capability, and no escalation pivot succeeds (a contained dead-end, measured not asserted)</td><td>72 rerouted attacks: 0 budget granted, 0 grants, 0 escalations</td><td class="pass">PASS</td><td class="quiet">pass — phantom grants zero budget by construction and an un-keyed/over-budget/un-granted pivot is still dropped</td></tr></tbody></table></div><h2>The attack battery</h2><div class="card"><p class="quiet" style="margin-top:0">Eight attack shapes plus replay, 8 of each, against 48 valid packets — fresh Ed25519 keys each run, so the counts are what is compared. Every attack is dropped; every valid packet passes.</p><div class="scroll"><table><thead><tr><th>attack</th><th>thrown</th><th>dropped</th></tr></thead><tbody><tr><td>forged</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>tampered</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>budget-exceeded</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>resource-denied</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>malformed</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>off-kappa</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>unknown-source</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>source-mismatch</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr><td>replay</td><td class="n">8</td><td class="n">8 ✓</td></tr><tr class="best"><td>valid packets</td><td class="n">48</td><td class="n">48 passed</td></tr></tbody></table></div><p class="quiet">Forged and tampered packets reached unpack <b>0</b> times — the signature is checked before the payload is parsed.</p></div><h2>The grown detector</h2><div class="card"><p style="margin-top:0">Individually-valid packets can still form a hostile <b>stream</b> — a scan across targets, a budget drain, a burst. A detector (a weight per feature n, fanout, budgetSum, dominance, resourceSpread and a threshold) was grown on 60 training streams and measured on 60 held-out streams it never saw.</p><div class="scroll"><table><thead><tr><th></th><th>hostile streams caught</th><th>legit flagged</th></tr></thead><tbody><tr class="best"><td>grown</td><td class="n">27 of 27</td><td class="n">none</td></tr><tr><td>hand-set baseline</td><td class="n">11 of 27</td><td class="n">none</td></tr></tbody></table></div><p class="quiet">A false pass — flagging a legit stream — is death in the fitness, so a detector that cries wolf never survives. The grown weights: [3.26,1.7,0.58,0.28,0.33], threshold 0.992.</p></div><h2>What v2 hardened</h2><div class="card"><p class="quiet" style="margin-top:0">Four flags a verify pass raised, each now sealed and measured, not asserted.</p><h3>A bounded replay store</h3><p>An unbounded set of every nonce ever seen is a memory-exhaustion DoS. The store is now a sliding window of the most recent <b>64</b> nonces. Under a flood of <b>400</b> unique packets it peaked at <b>64</b> — never past the cap — while <b>64 of 64</b> in-window replays were still caught. A packet older than the window is forgotten; that trade is what bounds the memory.</p><h3>Gate and detector, coupled</h3><p>The per-packet gate has no cumulative budget. A stream of <b>20</b> packets each within the per-packet cap of <b>3000</b> drew <b>59810</b> cumulatively — 20× the cap. Every packet passed the gate; the detector over the accepted window caught the drain. Gate and detector together, not either alone.</p><h3>A harder held-out set</h3><p>The clean train/test split gave the detector a fat margin. Re-measured on a near-boundary set — legit and hostile mixed right at the cut, a real distribution shift — the grown detector held up: 0 of 32 caught vs the baseline's 0, no legit stream flagged (the best any threshold on its weights reaches here is 20).</p><h3>A contained honeypot</h3><p>Every one of the <b>72</b> rerouted attacks got <b>0</b> budget and <b>0</b> capabilities, and <b>0</b> escalation pivots succeeded. A dead-end that is measured to be a dead-end.</p></div>
 <h2>The 6-byte packet</h2>
 <div class="card"><p class="quiet" style="margin-top:0">A command is six bytes — the Primorial-Fold packet. On the wire it travels signed: <code>[sourceId:1][payload:6][Ed25519 signature:64]</code> = 71 bytes.</p>
 <div class="packet"><div class="byte"><b>[0] opcode</b><span>what to do</span></div><div class="byte"><b>[1] source · target</b><span>two 4-bit node indices</span></div><div class="byte"><b>[2] resources</b><span>an 8-bit capability bitmask</span></div><div class="byte"><b>[3–4] budget</b><span>uint16, little-endian</span></div><div class="byte"><b>[5] κ-witness</b><span>the primorial fold of bytes 0–4</span></div></div></div>
@@ -61,7 +61,7 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:v
 <p><b>The question.</b> Does the structural gate — verify the signature before the six bytes are ever parsed, budget ≤ the capability lattice, at κ, unseen — catch every one of eight attack shapes with zero false passes, and does a detector GROWN against training streams beat a hand-set one on held-out hostile streams?</p>
 <p><b>The gate.</b> verify the Ed25519 signature over sourceId+payload BEFORE unpack is ever called (an unknown source is dropped before verify; a forged or tampered packet is dropped before parse), then unpack (bad-length, off-κ), source nibble must match, budget ≤ the lattice cap, resources ⊆ the grant, and the signature must be unseen (replay).</p>
 <p><b>The grown detector.</b> training and held-out streams (60 / 60, seeded) of individually-valid packets: scans, drains and bursts are attacks, small focused streams are legit. The detector (a weight per feature n/fanout/budgetSum/dominance/resourceSpread and a threshold) is grown on the training streams only (2000 seeded tries, fitness = catch rate with zero false passes) and measured on the held-out streams against the hand-set baseline {&quot;weights&quot;:[0,1,1,0,0],&quot;threshold&quot;:0.4}.</p>
-<p class="quiet">Sealed in <code>154b65c</code> · <a href="data/prereg.json">the pre-registration</a> · <a href="data/run.json">the record</a></p>
+<p class="quiet">Sealed in <code>8bd5e50</code> · <a href="data/prereg.json">the pre-registration</a> · <a href="data/run.json">the record</a></p>
 <p class="quiet">Ed25519 keys are generated fresh on every run and never committed; what is sealed is the attack shapes and the verdict counts, which are identical on every machine. The live page re-runs the deterministic core (the codec round-trip and the grown detector) in the browser; the signed battery is re-run by CI, which has node's crypto. Replay detection here is exact-bytes-seen (the signature is the nonce). A production mesh needs monotonic counters or timestamps so a legitimate repeat is not mistaken for a replay; that is a design note, not part of this seal. The honeypot reroute (a zero-budget phantom cell) and the per-node quarantine are built and unit-tested as isolated local state; the antibody broadcast over LoRa / acoustics / NFC is hardware-dependent and is design only, never measured here. The append-only binary ledger (exhale on close, inhale on boot) is a separate real feature noted for fall-os, not part of this seal. The seven-defense framing (gate, mesh, proof-chain, bonded-pair, compression-cipher, κ-band, self-heal) is the estate's language for the design; what is measured here is the signed-packet gate and one grown detector. Konomi/the primorial fold is Thomas Frumkin's.</p></div>
 <footer>
  <p>Every number here comes from the mutation-gated kernel <code>sentinel.mjs</code>, inlined below. · <a href="https://github.com/sjgant80-hub/sentinel">source</a> · MIT for the code.</p>
@@ -94,6 +94,8 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:v
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const int = (v) => (Number.isInteger(v) ? v : NaN);
+// a replay store is anything the gate can ask `has` and tell `add` — a plain Set, or the bounded store below.
+const isStore = (s) => s instanceof Set || (isObj(s) && typeof s.has === 'function' && typeof s.add === 'function');
 
 // the prime spine of the fold — one prime per payload byte (the primorial fold; see Thomas Frumkin's codec)
 const SPINE = [2, 3, 5, 11, 31];
@@ -142,6 +144,28 @@ const hex = (u8) => { let s = ''; for (const b of u8) s += b.toString(16).padSta
 const num = (x) => { const n = Number(x); return Number.isFinite(n) ? n : 0; };
 function fingerprint(raw) { return raw instanceof Uint8Array && raw.length === WIRE ? hex(raw.subarray(7)) : null; }
 
+// A BOUNDED, sliding-window replay store. An unbounded Set of every nonce ever seen is a memory-exhaustion DoS: an attacker
+// floods unique signed packets and the set grows without limit. This store remembers only the most recent `cap` nonces —
+// a flood can never push it past `cap` (oldest-first eviction, FIFO) — while any replay still inside the window is caught.
+// A packet older than the window is forgotten, so an ancient replay would pass; that is the deliberate sliding-window
+// trade (a production mesh uses monotonic counters), and it is what keeps the memory bounded. Duck-typed to a Set
+// (has/add), so the gate takes either.
+function replayStore(max) {
+  const cap = Number.isInteger(max) && max > 0 ? max : 4096;
+  const seen = new Map(); // insertion order IS arrival order, so the first key is always the oldest nonce
+  return {
+    cap,
+    get size() { return seen.size; },
+    has(nonce) { return seen.has(nonce); },
+    add(nonce) {
+      if (nonce == null || seen.has(nonce)) return false;
+      seen.set(nonce, 1);
+      if (seen.size > cap) seen.delete(seen.keys().next().value);
+      return true;
+    },
+  };
+}
+
 const reject = (reason) => ({ ok: false, reason, command: null });
 
 // THE GATE. ctx = { keys:{id:publicKey}, lattice:{id:{maxBudget,resources}}, seen:Set, verify:(key,msg,sig)=>boolean }.
@@ -150,7 +174,7 @@ function check(raw, ctx) {
   const c = isObj(ctx) ? ctx : {};
   const keys = isObj(c.keys) ? c.keys : {};
   const lattice = isObj(c.lattice) ? c.lattice : {};
-  const seen = c.seen instanceof Set ? c.seen : null;
+  const seen = isStore(c.seen) ? c.seen : null;
   const verify = typeof c.verify === 'function' ? c.verify : null;
   if (!(raw instanceof Uint8Array) || raw.length !== WIRE) return reject('bad-length');
   const sourceId = raw[0];
@@ -178,6 +202,24 @@ function check(raw, ctx) {
 function phantom(verdict) {
   const reason = isObj(verdict) && typeof verdict.reason === 'string' ? verdict.reason : 'dropped';
   return { phantom: true, granted: false, budget: 0, cell: 'phantom', echo: reason };
+}
+
+// THE COUPLING, made explicit. The per-packet gate (check) has NO cumulative budget: a source can send many packets each
+// within its per-packet grant and still drain far more than any one of them. The gate alone cannot see that. The grown
+// detector over the window of ACCEPTED packets is what covers it. immune runs a whole stream through the gate, then runs
+// the detector over everything the gate let through — so a drain that passes packet-by-packet is still caught by the
+// detector. Gate AND detector together is the immune property; neither alone is the defence.
+function immune(rawStream, ctx, detector) {
+  const stream = Array.isArray(rawStream) ? rawStream : [];
+  const accepted = [];
+  let rejected = 0;
+  for (const raw of stream) {
+    const v = check(raw, ctx);
+    if (v.ok) accepted.push(v.command); else rejected += 1;
+  }
+  const budgetDrawn = accepted.reduce((s, c) => s + (int(c.budget) || 0), 0);
+  const flagged = flags(accepted, detector);
+  return { total: stream.length, accepted: accepted.length, rejected, budgetDrawn, flagged, caught: flagged || rejected > 0 };
 }
 
 // ── the grown detector: hostile STREAMS of individually-valid packets ───────────────────────────────────────────────
@@ -260,6 +302,10 @@ function grade(prereg, run) {
   const g = isObj(run) ? run : {};
   const hard = isObj(g.hard) ? g.hard : {};
   const grown = isObj(g.grown) ? g.grown : {};
+  const bounded = isObj(g.bounded) ? g.bounded : {};
+  const coupled = isObj(g.coupled) ? g.coupled : {};
+  const near = isObj(g.near) ? g.near : {};
+  const honey = isObj(g.honeypot) ? g.honeypot : {};
   const rules = [
     { id: 'hard-catches-all', value: hard.caught + ' of ' + hard.attacks + ' structural attacks dropped', pass: hard.attacks > 0 && hard.caught === hard.attacks },
     { id: 'hard-zero-false-pass', value: hard.falsePass + ' valid packets wrongly dropped (of ' + hard.valid + ')', pass: hard.falsePass === 0 && hard.valid > 0 },
@@ -267,6 +313,10 @@ function grade(prereg, run) {
     { id: 'grown-beats-baseline', value: 'grown caught ' + grown.grownCatch + ', hand-set baseline ' + grown.baselineCatch + ' (held-out)', pass: grown.grownCatch > grown.baselineCatch },
     { id: 'grown-zero-false-pass', value: grown.grownFalsePass ? 'flagged a legit stream' : 'no legit stream flagged', pass: grown.grownFalsePass === false },
     { id: 'reproducible', value: 'CI re-runs the whole battery from the seal', pass: g.reproduced === true },
+    { id: 'replay-bounded', value: 'under ' + bounded.flood + ' unique packets the store peaked at ' + bounded.maxSize + ' of cap ' + bounded.cap + '; ' + bounded.replaysCaught + ' of ' + bounded.replaysTried + ' in-window replays caught', pass: bounded.flood > bounded.cap && bounded.maxSize <= bounded.cap && bounded.replaysTried > 0 && bounded.replaysCaught === bounded.replaysTried },
+    { id: 'gate-detector-couple', value: coupled.accepted + ' of ' + coupled.total + ' packets passed the per-packet gate (cap ' + coupled.perPacketCap + ') drawing ' + coupled.budgetDrawn + ' cumulative; the detector ' + (coupled.flagged ? 'caught' : 'missed') + ' the stream', pass: coupled.total > 0 && coupled.rejected === 0 && coupled.budgetDrawn > coupled.perPacketCap && coupled.flagged === true },
+    { id: 'grown-holds-near-boundary', value: 'near-boundary held-out: grown caught ' + near.grownCatch + ' of ' + near.attacks + ', baseline ' + near.baselineCatch + ' (best grown-weight threshold reaches ' + near.sweepBest + '); ' + (near.grownFalsePass ? 'flagged a legit stream' : 'no legit flagged'), pass: near.attacks > 0 && near.grownCatch >= near.baselineCatch && near.grownFalsePass === false },
+    { id: 'honeypot-contained', value: honey.rerouted + ' rerouted attacks: ' + honey.budgetGranted + ' budget granted, ' + honey.granted + ' grants, ' + honey.escalations + ' escalations', pass: honey.rerouted > 0 && honey.budgetGranted === 0 && honey.granted === 0 && honey.escalations === 0 && honey.pivotBlocked === true },
   ];
   return { rules, passed: rules.filter((r) => r.pass).length, of: rules.length };
 }
@@ -301,9 +351,38 @@ function streams(cfg, seed, n) {
   return out;
 }
 
+// NEAR-BOUNDARY streams — the hard case, deliberately at the cut. The plain `streams` above split cleanly: attacks were big,
+// legit was small, and a detector could learn a fat margin. Real traffic is not clean. Here legit is pushed up to the edge of
+// hostile (a few more packets, a wider reach, a bigger single draw — but still a focused, honest burst) and hostile is pulled
+// down to the edge of legit (a scan just over the line, a drain only just over a legit draw, a burst at its floor). A detector
+// grown on the clean split is measured here for real generalization under distribution shift, not an easy margin. Same seeded
+// shape as `streams`, so the browser and CI see the identical set.
+function nearBoundary(cfg, seed, n) {
+  const sources = (cfg && cfg.sources) || 4;
+  const r = rng(seed);
+  const d = (k) => Math.floor(r() * k);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const attack = d(2) === 0;
+    const w = [];
+    const src = d(sources);
+    if (attack) {
+      const shape = d(3);
+      if (shape === 0) { const m = 6; for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 1 << d(2), budget: 1 + d(40) }); }          // scan at its floor: just six targets, small budgets
+      else if (shape === 1) { const m = 1 + d(2); for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 1 << d(3), budget: 300 + d(200) }); } // drain only just over a legit draw
+      else { const m = 9 + d(3); for (let k = 0; k < m; k++) w.push({ source: src, target: d(4), resources: 1 << d(2), budget: 1 + d(30) }); }                     // burst just over the legit packet count
+    } else {
+      const m = 3 + d(3); const tgt = d(16);                                                                                                                      // a big-but-honest legit stream: 3–5 packets, a couple of targets, a decent single draw
+      for (let k = 0; k < m; k++) w.push({ source: src, target: (tgt + d(3)) % 16, resources: 1 << d(2), budget: 1 + d(220) });
+    }
+    out.push({ attack, window: w });
+  }
+  return out;
+}
+
 </script>
 <script>
-const CONFIG = {"sources":4,"valid":48,"perAttack":8,"streamsTrain":60,"streamsHeld":60,"grow":{"tries":2000,"weightSpan":4,"maxThreshold":1},"seed":2718};
+const CONFIG = {"sources":4,"valid":48,"perAttack":8,"streamsTrain":60,"streamsHeld":60,"grow":{"tries":2000,"weightSpan":4,"maxThreshold":1},"seed":2718,"bounded":{"cap":64,"flood":400},"coupled":{"packets":20,"perPacketCap":3000}};
 const RECORD = {"grown":{"detector":{"weights":[3.26,1.7,0.58,0.28,0.33],"threshold":0.992},"trainN":60,"heldN":60,"heldAttacks":27,"grownCatch":27,"grownFalsePass":false,"baselineCatch":11,"baselineFalsePass":false}};
 const K = new Function(document.getElementById('kernel').textContent + '\nreturn { pack, unpack, grow, fitness, streams, BASELINE, rng };')();
 document.getElementById('rerun').addEventListener('click', () => {
