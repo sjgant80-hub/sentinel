@@ -1,0 +1,15 @@
+# SENTINEL
+
+> A structural immune system: a verify-before-parse signed-packet gate, a capability budget, a κ-witness, and a grown anomaly detector, sealed against a red-team battery.
+
+Sealed, being measured. The packet, the gate, the attack shapes, the rules and a prediction were committed before the battery ran; the result lands here whichever way it goes.
+
+## Key pages
+
+- [Live page](https://sjgant80-hub.github.io/sentinel/)
+- [Repository](https://github.com/sjgant80-hub/sentinel)
+- [Pre-registration](https://sjgant80-hub.github.io/sentinel/data/prereg.json)
+
+## Credits
+
+- Powered by the Konomi architecture, created by Thomas Frumkin. The κ-witness fold is Thomas Frumkin's codec.

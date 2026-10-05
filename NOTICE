@@ -1,0 +1,11 @@
+SENTINEL
+Copyright 2026 sjgant80-hub. The code is MIT-licensed (see LICENSE).
+
+The κ-witness (byte 5 of the packet) is the primorial fold of bytes 0–4 — the encoding core of Thomas Frumkin's primorial
+fold codec (Konomi). The capability lattice (budget ≤ grant) is the estate's wallet model. Powered by the Konomi
+architecture, created by Thomas Frumkin.
+
+SENTINEL measures the signed-packet gate and one grown anomaly detector against a sealed red-team battery. The honeypot and
+per-node quarantine are built and unit-tested as isolated local state. The antibody broadcast over LoRa / acoustics / NFC
+is hardware-dependent and is design only. The append-only binary ledger (exhale on close, inhale on boot) is a separate
+real feature noted for fall-os / FallWorld, not part of this seal.

@@ -1,0 +1,87 @@
+{
+ "ok": true,
+ "v": 1,
+ "system": "A structural security kernel and its sealed red-team measurement: a 6-byte signed-command codec and a verify-before-parse gate (Ed25519, capability budget, κ-witness, replay), plus a grown anomaly detector over synthetic packet streams. Deterministic, runs locally and in the browser; calls no model, collects nothing, moves no money.",
+ "asOf": "2026-10-05",
+ "lawChecked": "2026-09-30",
+ "ai": "narrow",
+ "deployment": "local",
+ "annexIII": null,
+ "aiAct": {
+  "applies": true,
+  "role": "provider (Art 3(3)) — it builds the AI system and puts it into service under its own name",
+  "tier": "minimal"
+ },
+ "gdpr": {
+  "applies": false,
+  "why": "No personal data is processed, so no GDPR / UK GDPR duty arises from the build."
+ },
+ "items": [
+  {
+   "id": "aia-scope",
+   "regime": "EU AI Act",
+   "ref": "Art 2(1)(c)",
+   "title": "A UK company is in scope when its AI output is used in the EU",
+   "status": "unchanged",
+   "inForce": true,
+   "from": "2024-08-01",
+   "note": "Where the model runs does not change scope; who uses the output does.",
+   "quote": "providers and deployers of AI systems that have their place of establishment or are located in a third country, where the output produced by the AI system is used in the Union",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689",
+   "checked": "2026-09-29"
+  },
+  {
+   "id": "aia-provider",
+   "regime": "EU AI Act",
+   "ref": "Art 3(3) and 3(11)",
+   "title": "Building an AI system for your own use makes you its provider",
+   "status": "yours",
+   "inForce": true,
+   "from": "2024-08-01",
+   "note": "Local-first in-house systems: the company is provider and deployer. Plan for provider duties (for this design: Article 50 and AI literacy; full high-risk duties only if a high-risk use is added).",
+   "quote": "‘putting into service’ means the supply of an AI system for first use directly to the deployer or for own use in the Union for its intended purpose",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689",
+   "checked": "2026-09-29"
+  },
+  {
+   "id": "aia-4",
+   "regime": "EU AI Act",
+   "ref": "Art 4 (as replaced by Reg 2026/1744)",
+   "title": "AI literacy",
+   "status": "unchanged",
+   "inForce": true,
+   "from": "2025-02-02",
+   "note": "Training plan in the operating model (Phase 0).",
+   "quote": "Providers and deployers of AI systems shall take measures to support the development of AI literacy of their staff and other persons dealing with the operation and use of AI systems on their behalf",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R1744",
+   "checked": "2026-09-29"
+  },
+  {
+   "id": "aia-99",
+   "regime": "EU AI Act",
+   "ref": "Art 99(3), 99(4)",
+   "title": "Fines",
+   "status": "unchanged",
+   "inForce": true,
+   "from": "2025-08-02",
+   "note": "Up to EUR 35 000 000 or 7 % for prohibited practices (Art 99(3)).",
+   "quote": "up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year, whichever is higher",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689",
+   "checked": "2026-09-29"
+  }
+ ],
+ "counts": {
+  "removed": 0,
+  "eased": 0,
+  "yours": 1,
+  "shared": 0,
+  "unchanged": 3
+ },
+ "applying": 4,
+ "inForce": 4,
+ "upcoming": [],
+ "blocking": [],
+ "build": "sentinel",
+ "generatedBy": "fall-euaiact comply.mjs",
+ "lawSource": "https://github.com/sjgant80-hub/fall-euaiact/blob/main/law/law.json"
+}

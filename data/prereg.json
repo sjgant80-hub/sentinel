@@ -1,0 +1,70 @@
+{
+ "kind": "sentinel-prereg",
+ "v": 1,
+ "written": "2026-10-05",
+ "approvedBy": "Simon, relayed verbatim: \"yes i want a sentinal organ fun time\"",
+ "statement": "Sealed, committed and pushed before the battery was run. SENTINEL must drop every attack it has never seen while passing every valid packet; the grown detector is evolved on training streams and measured on held-out streams. Published whichever way it lands.",
+ "question": "Does the structural gate — verify the signature before the six bytes are ever parsed, budget ≤ the capability lattice, at κ, unseen — catch every one of eight attack shapes with zero false passes, and does a detector GROWN against training streams beat a hand-set one on held-out hostile streams?",
+ "sealed": {
+  "sentinel.mjs": "877f07a12d7af441533333961ef9371596a6e40a1a669ea7794b2d3ee518972b",
+  "tools/redteam.mjs": "f735409557d2e0e37f4dce68bfb6d1b4bdd4cf1cfe08ae90b71779c23b53bd24"
+ },
+ "packet": "the 6-byte Primorial-Fold packet: [0] opcode · [1] (source<<4)|target · [2] resource bitmask · [3–4] budget uint16 LE · [5] κ-witness (the primorial fold of bytes 0–4, Thomas Frumkin's codec). On the wire: [sourceId:1][payload:6][Ed25519 signature:64] = 71 bytes.",
+ "gate": "verify the Ed25519 signature over sourceId+payload BEFORE unpack is ever called (an unknown source is dropped before verify; a forged or tampered packet is dropped before parse), then unpack (bad-length, off-κ), source nibble must match, budget ≤ the lattice cap, resources ⊆ the grant, and the signature must be unseen (replay).",
+ "attacks": "forged, tampered, budget-exceeded, resource-denied, malformed, off-kappa, unknown-source, source-mismatch, replay — 8 of each, against 48 valid packets; fresh Ed25519 keys each run, so the counts are what is compared, not the bytes",
+ "grown": "training and held-out streams (60 / 60, seeded) of individually-valid packets: scans, drains and bursts are attacks, small focused streams are legit. The detector (a weight per feature n/fanout/budgetSum/dominance/resourceSpread and a threshold) is grown on the training streams only (2000 seeded tries, fitness = catch rate with zero false passes) and measured on the held-out streams against the hand-set baseline {\"weights\":[0,1,1,0,0],\"threshold\":0.4}.",
+ "config": {
+  "sources": 4,
+  "valid": 48,
+  "perAttack": 8,
+  "streamsTrain": 60,
+  "streamsHeld": 60,
+  "grow": {
+   "tries": 2000,
+   "weightSpan": 4,
+   "maxThreshold": 1
+  },
+  "seed": 2718
+ },
+ "rules": [
+  {
+   "id": "hard-catches-all",
+   "rule": "every structural attack is dropped (caught === attacks)"
+  },
+  {
+   "id": "hard-zero-false-pass",
+   "rule": "no valid packet is dropped (falsePass === 0, valid > 0)"
+  },
+  {
+   "id": "verify-before-parse",
+   "rule": "no forged or tampered packet is ever parsed — each is judged forged, a verdict only the signature check can reach (parsedForged === 0)"
+  },
+  {
+   "id": "grown-beats-baseline",
+   "rule": "on the held-out streams the grown detector catches more hostile streams than the hand-set baseline"
+  },
+  {
+   "id": "grown-zero-false-pass",
+   "rule": "the grown detector flags no legit held-out stream"
+  },
+  {
+   "id": "reproducible",
+   "rule": "re-running the whole battery from the seal gives the same counts and the same grown detector — CI re-runs it on every push"
+  }
+ ],
+ "predictions": {
+  "said": "before the battery was run, by Kar",
+  "hard-catches-all": "pass — the gate is correct by construction, but this proves there is no hole left open",
+  "hard-zero-false-pass": "pass",
+  "verify-before-parse": "pass — the gate returns forged for a tampered payload, never off-κ",
+  "grown-beats-baseline": "pass, narrowly — the search should find a cut at least as good as the hand-set one; it could tie",
+  "grown-zero-false-pass": "pass — a false pass is death in the fitness, so the grown detector cannot carry one",
+  "reproducible": "pass"
+ },
+ "disclosures": [
+  "Ed25519 keys are generated fresh on every run and never committed; what is sealed is the attack shapes and the verdict counts, which are identical on every machine. The live page re-runs the deterministic core (the codec round-trip and the grown detector) in the browser; the signed battery is re-run by CI, which has node's crypto.",
+  "Replay detection here is exact-bytes-seen (the signature is the nonce). A production mesh needs monotonic counters or timestamps so a legitimate repeat is not mistaken for a replay; that is a design note, not part of this seal.",
+  "The honeypot reroute (a zero-budget phantom cell) and the per-node quarantine are built and unit-tested as isolated local state; the antibody broadcast over LoRa / acoustics / NFC is hardware-dependent and is design only, never measured here. The append-only binary ledger (exhale on close, inhale on boot) is a separate real feature noted for fall-os, not part of this seal.",
+  "The seven-defense framing (gate, mesh, proof-chain, bonded-pair, compression-cipher, κ-band, self-heal) is the estate's language for the design; what is measured here is the signed-packet gate and one grown detector. Konomi/the primorial fold is Thomas Frumkin's."
+ ]
+}

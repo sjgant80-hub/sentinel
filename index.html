@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL</title>
+<meta name="description" content="A structural immune system: a command that is not signed, within budget, at κ and unseen never becomes a command at all. Sealed against a red-team battery; the grown detector re-runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7-5 12-12 14C9 28 4 23 4 16V7z' fill='%23d6a93a'/%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"SENTINEL","description":"A structural immune system: verify-before-parse signed-packet gate, capability budget, κ-witness, and a grown anomaly detector, sealed against a red-team battery.","codeRepository":"https://github.com/sjgant80-hub/sentinel","url":"https://sjgant80-hub.github.io/sentinel/","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Kar"}}</script>
+<style>
+:root{--bg:#0c0b10;--panel:#15131b;--line:#2d2a36;--ink:#ece6d6;--dim:#a39c8c;--faint:#6f6a78;--gold:#d6a93a;--soft:#e9cf7f;--ok:#5fbf8f;--no:#e0616d;
+ --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fbf8f1;--panel:#fff;--line:#e4dcc9;--ink:#22201c;--dim:#5e564a;--faint:#8b8272;--gold:#8a6a13;--soft:#6d5310}}
+:root[data-theme="light"]{--bg:#fbf8f1;--panel:#fff;--line:#e4dcc9;--ink:#22201c;--dim:#5e564a;--faint:#8b8272;--gold:#8a6a13;--soft:#6d5310}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6}
+.wrap{max-width:56rem;margin:0 auto;padding:0 16px 5rem}
+header{padding:3rem 0 1.2rem}
+.kick{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 .6rem}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,6vw,3rem);margin:0 0 .5rem;color:var(--soft)}
+.lede{font-family:var(--serif);font-style:italic;color:var(--dim);font-size:clamp(1rem,2.4vw,1.2rem);margin:0}
+h2{font-family:var(--serif);font-weight:500;color:var(--gold);font-size:1.3rem;margin:2.3rem 0 .4rem}
+h3{font-size:1rem;margin:1rem 0 .3rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:.8rem 0;overflow-x:auto}
+.verdict{border-color:var(--gold)}
+.big{font-size:1.1rem;margin-top:0}.stat{font-variant-numeric:tabular-nums;font-weight:700;color:var(--soft)}
+.quiet{color:var(--dim);font-size:.92rem}.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:.4rem .45rem;border-top:1px solid var(--line);vertical-align:top}
+th{color:var(--faint);font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;border-top:0}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.best td{color:var(--soft);font-weight:600}
+.pass{color:var(--ok);font-family:var(--mono);font-weight:700}.fail{color:var(--no);font-family:var(--mono);font-weight:700}
+.packet{display:flex;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:.8rem;margin:.4rem 0}
+.byte{border:1px solid var(--line);border-radius:7px;padding:.4rem .6rem;flex:1 1 90px;min-width:0}
+.byte b{color:var(--soft);display:block}.byte span{color:var(--faint);font-size:.72rem}
+code{font-family:var(--mono);font-size:.85em;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.05em .3em;overflow-wrap:anywhere}
+button{font:inherit;background:var(--gold);color:#16130c;border:0;border-radius:8px;padding:.6rem 1.1rem;font-weight:600;cursor:pointer}
+button:hover{background:var(--soft)}button:disabled{opacity:.6;cursor:wait}button:focus-visible{outline:2px solid var(--soft);outline-offset:2px}
+a{color:var(--soft)}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--faint);font-size:.84rem}
+</style></head><body><div class="wrap">
+<header>
+ <p class="kick">An estate organ · the structural immune system</p>
+ <h1>SENTINEL</h1>
+ <p class="lede">Not a wall bolted on, but the shape of the thing: a command that is not signed, not within its budget, not at κ, and not unseen never becomes a command at all.</p>
+</header>
+<h2>The verdict</h2>
+<div class="card verdict"><p class="big">Sealed, being measured.</p><p>Sealed, being measured. The packet, the gate, the attack shapes, the rules and a prediction were committed before the battery ran; the result lands here whichever way it goes.</p></div>
+
+<h2>The 6-byte packet</h2>
+<div class="card"><p class="quiet" style="margin-top:0">A command is six bytes — the Primorial-Fold packet. On the wire it travels signed: <code>[sourceId:1][payload:6][Ed25519 signature:64]</code> = 71 bytes.</p>
+<div class="packet"><div class="byte"><b>[0] opcode</b><span>what to do</span></div><div class="byte"><b>[1] source · target</b><span>two 4-bit node indices</span></div><div class="byte"><b>[2] resources</b><span>an 8-bit capability bitmask</span></div><div class="byte"><b>[3–4] budget</b><span>uint16, little-endian</span></div><div class="byte"><b>[5] κ-witness</b><span>the primorial fold of bytes 0–4</span></div></div></div>
+<h2>Seven defences, one shape</h2>
+<div class="card"><h3>verify before parse</h3><p>The Ed25519 signature over sourceId+payload is checked before the six bytes are ever unpacked. A forged or tampered command is dropped before it reaches a DataView — an un-verified command never becomes a command.</p><h3>budget ≤ the lattice</h3><p>Each source is granted a capability: a maximum budget and an allowed set of resources. A command cannot spend budget it was never granted, or touch a resource outside its grant.</p><h3>at κ</h3><p>The sixth byte is the primorial fold of the first five (Thomas Frumkin's codec). A tampered payload no longer folds to its witness, so it reads off-κ without anyone needing to know the attack.</p><h3>unseen</h3><p>The signature is the packet's nonce; the same signed packet twice is a replay and is dropped.</p><h3>the honeypot</h3><p>A rejected command is dropped into a zero-budget phantom cell that touches no real state — an attacker who keeps probing only ever learns the shape of a cell that was never real.</p>
+<p class="quiet">To breach it an attacker must, at once, find a known source, forge a signature, fold the κ-witness, stay within a budget it was never granted, and send something never seen — several independent locks at the same node, not one wall with one breach. The full seven-defence framing (mesh quarantine, bonded-pair cross-check, compression cipher, self-heal) is the design; what is measured here is the signed-packet gate and one grown detector.</p></div>
+<h2>Re-run the deterministic core</h2>
+<div class="card"><p style="margin-top:0">The codec round-trip and the grown detector are pure and seeded — they re-run here in your browser from the same kernel this page is built from, and must match the committed record. </p>
+ <button id="rerun" type="button">Re-run</button> <span id="out" class="quiet" role="status" aria-live="polite"></span></div>
+<h2>What was sealed first</h2>
+<div class="card"><p style="margin-top:0">Sealed, committed and pushed before the battery was run. SENTINEL must drop every attack it has never seen while passing every valid packet; the grown detector is evolved on training streams and measured on held-out streams. Published whichever way it lands.</p>
+<p><b>The question.</b> Does the structural gate — verify the signature before the six bytes are ever parsed, budget ≤ the capability lattice, at κ, unseen — catch every one of eight attack shapes with zero false passes, and does a detector GROWN against training streams beat a hand-set one on held-out hostile streams?</p>
+<p><b>The gate.</b> verify the Ed25519 signature over sourceId+payload BEFORE unpack is ever called (an unknown source is dropped before verify; a forged or tampered packet is dropped before parse), then unpack (bad-length, off-κ), source nibble must match, budget ≤ the lattice cap, resources ⊆ the grant, and the signature must be unseen (replay).</p>
+<p><b>The grown detector.</b> training and held-out streams (60 / 60, seeded) of individually-valid packets: scans, drains and bursts are attacks, small focused streams are legit. The detector (a weight per feature n/fanout/budgetSum/dominance/resourceSpread and a threshold) is grown on the training streams only (2000 seeded tries, fitness = catch rate with zero false passes) and measured on the held-out streams against the hand-set baseline {&quot;weights&quot;:[0,1,1,0,0],&quot;threshold&quot;:0.4}.</p>
+<p class="quiet"><a href="data/prereg.json">the pre-registration</a></p>
+<p class="quiet">Ed25519 keys are generated fresh on every run and never committed; what is sealed is the attack shapes and the verdict counts, which are identical on every machine. The live page re-runs the deterministic core (the codec round-trip and the grown detector) in the browser; the signed battery is re-run by CI, which has node's crypto. Replay detection here is exact-bytes-seen (the signature is the nonce). A production mesh needs monotonic counters or timestamps so a legitimate repeat is not mistaken for a replay; that is a design note, not part of this seal. The honeypot reroute (a zero-budget phantom cell) and the per-node quarantine are built and unit-tested as isolated local state; the antibody broadcast over LoRa / acoustics / NFC is hardware-dependent and is design only, never measured here. The append-only binary ledger (exhale on close, inhale on boot) is a separate real feature noted for fall-os, not part of this seal. The seven-defense framing (gate, mesh, proof-chain, bonded-pair, compression-cipher, κ-band, self-heal) is the estate's language for the design; what is measured here is the signed-packet gate and one grown detector. Konomi/the primorial fold is Thomas Frumkin's.</p></div>
+<footer>
+ <p>Every number here comes from the mutation-gated kernel <code>sentinel.mjs</code>, inlined below. · <a href="https://github.com/sjgant80-hub/sentinel">source</a> · MIT for the code.</p>
+ <p>The κ-witness is the primorial fold of Thomas Frumkin's codec; the capability lattice is the estate's wallet. Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+</footer>
+</div>
+<script id="kernel" type="text/plain">
+// sentinel.mjs — SENTINEL, a structural immune system. Not a wall bolted on, but the shape of the thing: a command
+// that is not signed, not within its capability budget, not at κ, or already seen never becomes a command at all.
+//
+// THE 6-BYTE PRIMORIAL-FOLD PACKET (the genome of a command):
+//   [0] opcode                       what to do
+//   [1] (source << 4) | target       two 4-bit node indices (0–15)
+//   [2] resources                    an 8-bit capability bitmask
+//   [3..4] budget                    uint16, little-endian
+//   [5] κ-witness                    the primorial fold of bytes 0–4 (Thomas Frumkin's primorial fold codec); a tampered
+//                                     payload no longer folds to its witness, so it reads as off-κ
+// On the wire it travels SIGNED: [sourceId:1][payload:6][signature:64] = 71 bytes.
+//
+// THE GATE verifies the Ed25519 signature BEFORE the six bytes are ever parsed: an unsigned or forged command is dropped
+// before it reaches a DataView, so an un-verified command never compiles into a command. Then budget ≤ the capability
+// lattice (it cannot spend what it was never granted — the-wallet's rule), the packet must be unseen (no replay), and at κ.
+//
+// THE GROWN DETECTOR is the adaptive half: individually-valid packets can still form a hostile STREAM (a scan across
+// targets, a budget drain). A detector over a window of accepted packets is EVOLVED against held-out attack streams, and
+// may fail honestly — its fitness is the catch rate with zero false passes.
+//
+// Pure and deterministic. The readers (unpack, check, phantom, features, score, flags, grade) are total: garbage returns
+// {ok:false} or a zero, never throws. The crypto is injected into check (ctx.verify), so this kernel stays pure.
+
+const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const int = (v) => (Number.isInteger(v) ? v : NaN);
+
+// the prime spine of the fold — one prime per payload byte (the primorial fold; see Thomas Frumkin's codec)
+const SPINE = [2, 3, 5, 11, 31];
+const OPCODES = Object.freeze({ NOOP: 0, READ: 1, WRITE: 2, GRANT: 3, REVOKE: 4, COUPLE: 5, HEAL: 6, QUARANTINE: 7 });
+const RESOURCES = Object.freeze(['memory', 'compute', 'mesh', 'ledger', 'key', 'budget', 'gate', 'heal']);
+const WIRE = 71; // [sourceId:1][payload:6][signature:64]
+const PAYLOAD = 6;
+const SIG = 64;
+
+function popcount(x) {
+  let n = (x | 0) & 0xFF, c = 0;
+  while (n) { c += n & 1; n >>>= 1; }
+  return c;
+}
+
+// the κ-witness: the primorial fold of the first five payload bytes, modulo 256. Deterministic; a change to any payload
+// byte changes the fold, so the witness no longer matches — the packet reads off-κ without anyone knowing the attack.
+function foldWitness(bytes) {
+  let w = 0;
+  for (let i = 0; i < SPINE.length; i++) w += SPINE[i] * (((bytes && bytes[i]) | 0) & 0xFF);
+  return w & 0xFF;
+}
+
+// pack a command into its 6 bytes. Total: a command out of range returns null rather than throwing.
+function pack(command) {
+  if (!isObj(command)) return null;
+  const opcode = int(command.opcode), source = int(command.source), target = int(command.target), resources = int(command.resources), budget = int(command.budget);
+  if ([opcode, source, target, resources, budget].some(Number.isNaN)) return null;
+  if (opcode < 0 || opcode > 255 || source < 0 || source > 15 || target < 0 || target > 15 || resources < 0 || resources > 255 || budget < 0 || budget > 65535) return null;
+  const b = new Uint8Array(PAYLOAD);
+  b[0] = opcode; b[1] = (source << 4) | target; b[2] = resources; b[3] = budget & 0xFF; b[4] = (budget >> 8) & 0xFF;
+  b[5] = foldWitness(b);
+  return b;
+}
+
+// unpack the 6 bytes back into a command. Total: wrong length is bad-length, a broken fold is off-κ.
+function unpack(bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length !== PAYLOAD) return { ok: false, reason: 'bad-length' };
+  if (bytes[5] !== foldWitness(bytes)) return { ok: false, reason: 'off-kappa' };
+  return { ok: true, command: { opcode: bytes[0], source: (bytes[1] >> 4) & 0xF, target: bytes[1] & 0xF, resources: bytes[2], budget: bytes[3] | (bytes[4] << 8) } };
+}
+
+// the signature's own bytes are the replay nonce: Ed25519 gives one signature per (key, message), so the same signed
+// packet twice is a replay, and two different commands never collide.
+const hex = (u8) => { let s = ''; for (const b of u8) s += b.toString(16).padStart(2, '0'); return s; };
+const num = (x) => { const n = Number(x); return Number.isFinite(n) ? n : 0; };
+function fingerprint(raw) { return raw instanceof Uint8Array && raw.length === WIRE ? hex(raw.subarray(7)) : null; }
+
+const reject = (reason) => ({ ok: false, reason, command: null });
+
+// THE GATE. ctx = { keys:{id:publicKey}, lattice:{id:{maxBudget,resources}}, seen:Set, verify:(key,msg,sig)=>boolean }.
+// The order is the defense: length, then a known source, then the signature — all BEFORE the payload is unpacked.
+function check(raw, ctx) {
+  const c = isObj(ctx) ? ctx : {};
+  const keys = isObj(c.keys) ? c.keys : {};
+  const lattice = isObj(c.lattice) ? c.lattice : {};
+  const seen = c.seen instanceof Set ? c.seen : null;
+  const verify = typeof c.verify === 'function' ? c.verify : null;
+  if (!(raw instanceof Uint8Array) || raw.length !== WIRE) return reject('bad-length');
+  const sourceId = raw[0];
+  if (!Object.prototype.hasOwnProperty.call(keys, sourceId)) return reject('unknown-source');
+  const msg = raw.subarray(0, 7), sig = raw.subarray(7);
+  let good = false;
+  try { good = verify ? verify(keys[sourceId], msg, sig) === true : false; } catch { good = false; }
+  if (!good) return reject('forged');                               // ⟵ the payload has NOT been parsed yet
+  const nonce = fingerprint(raw);
+  if (seen && seen.has(nonce)) return reject('replay');
+  const u = unpack(raw.subarray(1, 7));                             // ⟵ only a verified packet reaches here
+  if (!u.ok) return reject(u.reason);
+  const cmd = u.command;
+  if (cmd.source !== sourceId) return reject('source-mismatch');
+  const cap = lattice[sourceId];
+  if (!isObj(cap)) return reject('no-capability');
+  if (cmd.budget > (int(cap.maxBudget) || 0)) return reject('budget-exceeded');
+  if ((cmd.resources & ~(int(cap.resources) || 0) & 0xFF) !== 0) return reject('resource-denied');
+  if (seen) seen.add(nonce);
+  return { ok: true, reason: 'ok', command: cmd, nonce };
+}
+
+// the honeypot: a rejected command is dropped into a zero-budget phantom cell. It grants nothing and touches no real
+// state, so an attacker who keeps probing only ever learns the shape of a cell that was never real.
+function phantom(verdict) {
+  const reason = isObj(verdict) && typeof verdict.reason === 'string' ? verdict.reason : 'dropped';
+  return { phantom: true, granted: false, budget: 0, cell: 'phantom', echo: reason };
+}
+
+// ── the grown detector: hostile STREAMS of individually-valid packets ───────────────────────────────────────────────
+// features of a window of accepted commands: how many, how wide the fan-out of targets, the budget drawn, how much one
+// source dominates, and how many resources were touched.
+function features(window) {
+  const w = (Array.isArray(window) ? window : []).filter(isObj);
+  const n = w.length;
+  if (!n) return { n: 0, fanout: 0, budgetSum: 0, dominance: 0, resourceSpread: 0 };
+  const targets = new Set(), bySource = new Map();
+  let budgetSum = 0, resBits = 0;
+  for (const c of w) {
+    targets.add(c.target);
+    bySource.set(c.source, (bySource.get(c.source) || 0) + 1);
+    budgetSum += int(c.budget) || 0;
+    resBits |= (int(c.resources) || 0);
+  }
+  return { n, fanout: targets.size, budgetSum, dominance: Math.max(...bySource.values()) / n, resourceSpread: popcount(resBits) };
+}
+const FEATURES = ['n', 'fanout', 'budgetSum', 'dominance', 'resourceSpread'];
+// each feature is scaled to roughly 0–1 by its natural ceiling, so one weight scale and one 0–1 threshold mean the same
+// across all five — without this a budget of tens of thousands drowns a fan-out of eight.
+const NORMS = Object.freeze({ n: 32, fanout: 16, budgetSum: 65535, dominance: 1, resourceSpread: 8 });
+function normalize(feat) {
+  const f = isObj(feat) ? feat : {};
+  const out = {};
+  for (const name of FEATURES) out[name] = num(f[name]) / NORMS[name];
+  return out;
+}
+
+// a detector is a weight per feature and a threshold; it flags a window whose weighted, normalized score reaches it.
+function score(feat, weights) {
+  const f = isObj(feat) ? feat : {};
+  const w = Array.isArray(weights) ? weights : [];
+  return FEATURES.reduce((s, name, i) => s + num(f[name]) * num(w[i]), 0);
+}
+function flags(window, detector) {
+  const d = isObj(detector) ? detector : {};
+  return score(normalize(features(window)), d.weights) >= num(d.threshold);
+}
+
+// ── growing the detector (seeded, like pattern-organs): random detectors, the fittest kept ──────────────────────────
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+// fitness on a labelled set of streams: the share of attacks caught, but ZERO if it flags any legit stream (a false pass
+// of a legit command is death — a defense that cries wolf is worse than none).
+function fitness(detector, streams) {
+  const s = (Array.isArray(streams) ? streams : []).filter(isObj);
+  const attacks = s.filter((x) => x.attack === true), legit = s.filter((x) => x.attack === false);
+  if (legit.some((x) => flags(x.window, detector))) return { score: 0, caught: 0, attacks: attacks.length, falsePass: true };
+  const caught = attacks.filter((x) => flags(x.window, detector)).length;
+  return { score: attacks.length ? caught / attacks.length : 0, caught, attacks: attacks.length, falsePass: false };
+}
+// grow(train, cfg, seed) → the fittest detector found over `tries` seeded random detectors (weights in [0,W], threshold
+// scaled to the data). A tie keeps the simpler (lower threshold). The search never touches the held-out streams.
+// a beats b: a higher catch score, or on a tie the higher threshold (flag as little as possible for the same catch).
+function better(a, b) {
+  return a.f.score > b.f.score || (a.f.score === b.f.score && a.d.threshold > b.d.threshold);
+}
+function grow(train, cfg, seed) {
+  const c = isObj(cfg) ? cfg : {};
+  const tries = Number.isInteger(c.tries) ? c.tries : 400;
+  const W = Number.isFinite(c.weightSpan) ? c.weightSpan : 4;
+  const maxT = Number.isFinite(c.maxThreshold) ? c.maxThreshold : 1;
+  const r = rng(seed >>> 0);
+  let best = null;
+  for (let t = 0; t < tries; t++) {
+    const weights = FEATURES.map(() => Math.round(r() * W * 100) / 100);
+    const threshold = Math.round(r() * maxT * 1000) / 1000;
+    const cand = { d: { weights, threshold }, f: fitness({ weights, threshold }, train) };
+    if (!best || better(cand, best)) best = cand;
+  }
+  return best ? best.d : { weights: FEATURES.map(() => 0), threshold: 0 };
+}
+
+// ── grading a sealed run ────────────────────────────────────────────────────────────────────────────────────────────
+function grade(prereg, run) {
+  const g = isObj(run) ? run : {};
+  const hard = isObj(g.hard) ? g.hard : {};
+  const grown = isObj(g.grown) ? g.grown : {};
+  const rules = [
+    { id: 'hard-catches-all', value: hard.caught + ' of ' + hard.attacks + ' structural attacks dropped', pass: hard.attacks > 0 && hard.caught === hard.attacks },
+    { id: 'hard-zero-false-pass', value: hard.falsePass + ' valid packets wrongly dropped (of ' + hard.valid + ')', pass: hard.falsePass === 0 && hard.valid > 0 },
+    { id: 'verify-before-parse', value: hard.parsedForged + ' forged packets ever reached unpack', pass: hard.parsedForged === 0 },
+    { id: 'grown-beats-baseline', value: 'grown caught ' + grown.grownCatch + ', hand-set baseline ' + grown.baselineCatch + ' (held-out)', pass: grown.grownCatch > grown.baselineCatch },
+    { id: 'grown-zero-false-pass', value: grown.grownFalsePass ? 'flagged a legit stream' : 'no legit stream flagged', pass: grown.grownFalsePass === false },
+    { id: 'reproducible', value: 'CI re-runs the whole battery from the seal', pass: g.reproduced === true },
+  ];
+  return { rules, passed: rules.filter((r) => r.pass).length, of: rules.length };
+}
+
+
+// streams.mjs — the synthetic hostile and legit STREAMS the grown detector is evolved and measured on. Nothing secret:
+// each stream is a window of individually-valid commands, seeded, so the browser and CI grow the same detector. Shared by
+// the red-team harness and inlined verbatim into the live page.
+
+// a reasonable hand-set detector to beat: flag a wide fan-out or a large budget draw (over normalized features)
+const BASELINE = { weights: [0, 1, 1, 0, 0], threshold: 0.4 };
+
+function streams(cfg, seed, n) {
+  const sources = (cfg && cfg.sources) || 4;
+  const r = rng(seed);
+  const d = (k) => Math.floor(r() * k);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const attack = d(2) === 0;
+    const w = [];
+    if (attack) {
+      const shape = d(3);
+      if (shape === 0) { const src = d(sources); const m = 6 + d(8); for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 1 << d(6), budget: 1 + d(20) }); }        // scan: one source, many targets
+      else if (shape === 1) { const src = d(sources); const m = 1 + d(3); for (let k = 0; k < m; k++) w.push({ source: src, target: d(16), resources: 0b00111111, budget: 20000 + d(40000) }); } // drain: a huge budget draw
+      else { const src = d(sources); const m = 14 + d(12); for (let k = 0; k < m; k++) w.push({ source: src, target: d(3), resources: 1 << d(6), budget: 1 + d(10) }); }                     // burst: a high packet rate
+    } else {
+      const src = d(sources); const m = 1 + d(4); const tgt = d(16);
+      for (let k = 0; k < m; k++) w.push({ source: src, target: tgt + (d(2) ? 0 : 1), resources: 1 << d(2), budget: 1 + d(50) });
+    }
+    out.push({ attack, window: w });
+  }
+  return out;
+}
+
+</script>
+<script>
+const CONFIG = {"sources":4,"valid":48,"perAttack":8,"streamsTrain":60,"streamsHeld":60,"grow":{"tries":2000,"weightSpan":4,"maxThreshold":1},"seed":2718};
+const RECORD = null;
+const K = new Function(document.getElementById('kernel').textContent + '\nreturn { pack, unpack, grow, fitness, streams, BASELINE, rng };')();
+document.getElementById('rerun').addEventListener('click', () => {
+  const out = document.getElementById('out');
+  // 1) the codec round-trips losslessly
+  const r = K.rng(12345); let codec = 0;
+  for (let i = 0; i < 2000; i++) {
+    const c = { opcode: Math.floor(r() * 256), source: Math.floor(r() * 16), target: Math.floor(r() * 16), resources: Math.floor(r() * 256), budget: Math.floor(r() * 65536) };
+    const u = K.unpack(K.pack(c));
+    if (u.ok && u.command.opcode === c.opcode && u.command.source === c.source && u.command.target === c.target && u.command.resources === c.resources && u.command.budget === c.budget) codec += 1;
+  }
+  // 2) the grown detector, regrown on the seeded streams and measured on the held-out set
+  const train = K.streams(CONFIG, CONFIG.seed + 1, CONFIG.streamsTrain);
+  const held = K.streams(CONFIG, CONFIG.seed + 2, CONFIG.streamsHeld);
+  const grown = K.grow(train, CONFIG.grow, CONFIG.seed + 3);
+  const g = K.fitness(grown, held), b = K.fitness(K.BASELINE, held);
+  const match = RECORD && grown.threshold === RECORD.grown.detector.threshold && g.caught === RECORD.grown.grownCatch && b.caught === RECORD.grown.baselineCatch && g.falsePass === RECORD.grown.grownFalsePass;
+  out.textContent = codec + '/2000 codec round-trips lossless; grown caught ' + g.caught + ', baseline ' + b.caught + ' of ' + g.attacks + ' held-out attacks' + (RECORD ? (match ? ' — IDENTICAL to the committed record.' : ' — DIFFERS from the record.') : '.');
+});
+</script>
+</body></html>

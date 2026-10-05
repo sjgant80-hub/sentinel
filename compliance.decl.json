@@ -1,0 +1,10 @@
+{
+ "declared": true,
+ "name": "sentinel",
+ "system": "A structural security kernel and its sealed red-team measurement: a 6-byte signed-command codec and a verify-before-parse gate (Ed25519, capability budget, κ-witness, replay), plus a grown anomaly detector over synthetic packet streams. Deterministic, runs locally and in the browser; calls no model, collects nothing, moves no money.",
+ "ai": "narrow",
+ "builtBy": "self",
+ "deployment": "local",
+ "personalData": false,
+ "euOutput": true
+}
