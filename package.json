@@ -1,0 +1,12 @@
+{
+  "name": "sentinel",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "sentinel.mjs",
+  "description": "SENTINEL: a structural immune system. A command that is not signed, within budget, at kappa and unseen never becomes a command at all - the signature is verified before the six bytes are parsed. Sealed against a red-team battery; the grown detector re-runs in the browser.",
+  "author": "sjgant80-hub <sjgant80@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test"
+  }
+}
