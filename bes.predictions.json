@@ -1,0 +1,27 @@
+{
+  "build": "sentinel / behavioral-entropy-signatures",
+  "what": "The one-class answer to flag3. The grown two-class stream detector overfit its clean margin and did not transfer under distribution shift. Behavioral Entropy Signatures model the OPERATOR's own entropy across three domains (network/behavioral/authorization) and flag deviation from the operator's OWN baseline, calibrated on the operator alone — so attack families the gate never saw are caught by construction. Re-derived on the runner from the seeded operator and two unseen attack families.",
+  "sealed_before_measurement": true,
+  "claims": [
+    { "id": "P1", "text": "Calibrated on the operator ALONE, the gate holds on held-out operator sessions — a low false-positive rate", "check": "opFpRate <= 0.05 && opN === 50" },
+    { "id": "P2", "text": "An UNSEEN scripted (overly-regular) attack family — never used to set the gate — is caught", "check": "scriptDetect >= 0.95 && scriptN === 40" },
+    { "id": "P3", "text": "An UNSEEN random (uncorrelated) attack family is caught", "check": "randDetect >= 0.95 && randN === 40" },
+    { "id": "P4", "text": "GENERALIZES: operator FP ≤ 0.1 and BOTH unseen attack families ≥ 0.9 — the one-class model transfers where the grown two-class detector (flag3) did not", "check": "generalizes === true" },
+    { "id": "P5", "text": "The operator baseline is a per-window mean + std (not a sum), so the thresholds are calibrated, not inflated", "check": "devMean < 1 && devStd < 0.15 && trainN === 80" }
+  ],
+  "expected": {
+    "devMean": 0.2354,
+    "devStd": 0.0598,
+    "trainN": 80,
+    "opN": 50,
+    "opFalse": 1,
+    "opFpRate": 0.02,
+    "scriptN": 40,
+    "scriptCaught": 40,
+    "scriptDetect": 1,
+    "randN": 40,
+    "randCaught": 40,
+    "randDetect": 1,
+    "generalizes": true
+  }
+}
