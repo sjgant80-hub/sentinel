@@ -5,6 +5,16 @@ The κ-witness (byte 5 of the packet) is the primorial fold of bytes 0–4 — t
 fold codec (Konomi). The capability lattice (budget ≤ grant) is the estate's wallet model. Powered by the Konomi
 architecture, created by Thomas Frumkin.
 
+The v3 Behavioral Entropy Signatures gate (bes.mjs / behavior.mjs / bes.html) is a faithful implementation of the
+Guided Entropy Principle security work of GARY W. FLOYD — Lumiea Systems Research Division, ThunderStruck Service LLC
+(New Caney, Texas) — "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps" (2025), Open
+Defensive Prior Art (CC BY 4.0). The three entropy domains (network / behavioral / authorization), the unified entropy
+state, the GEP security decision function (E(t) field / A(t) salience / |∇S| damping / ΔS shift) and the
+ALLOW/THROTTLE/STEP-UP/BLOCK/ISOLATE ladder, "credential validity does not override entropy violation," and the one-class
+"model the operator, flag deviation from the operator's own baseline" principle are Gary W. Floyd's. The idea + kernel +
+gate are the estate's own; GEP-BES is credited as the source principle. Honest scope (Gary §8): this performs stability
+regulation (is the behavior the operator's), not morality, intent, or malware classification.
+
 SENTINEL measures the signed-packet gate and one grown anomaly detector against a sealed red-team battery. The honeypot and
 per-node quarantine are built and unit-tested as isolated local state. The antibody broadcast over LoRa / acoustics / NFC
 is hardware-dependent and is design only. The append-only binary ledger (exhale on close, inhale on boot) is a separate

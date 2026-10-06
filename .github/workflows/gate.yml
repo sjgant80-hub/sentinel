@@ -8,14 +8,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: the immune kernel's tests
-        run: node --test sentinel.test.mjs
+      - name: the immune kernel's tests (signed gate + behavioral-entropy gate)
+        run: node --test sentinel.test.mjs bes.test.mjs
       # Pinned. An unpinned gate is a gate somebody else can change.
-      - name: witness — every mutant of the kernel must die
+      - name: witness — every mutant of both kernels must die
         run: |
           git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness
           node /tmp/witness/witness.mjs mutate sentinel.mjs --timeout 60000 --cap 400 --test node --test sentinel.test.mjs | tee verdict.txt
-          grep -q '"clean": true' verdict.txt || { echo "::error::mutants survived — the gate is not clean"; exit 1; }
+          grep -q '"clean": true' verdict.txt || { echo "::error::sentinel mutants survived"; exit 1; }
+          node /tmp/witness/witness.mjs mutate bes.mjs --timeout 60000 --cap 400 --test node --test bes.test.mjs | tee verdict.bes.txt
+          grep -q '"clean": true' verdict.bes.txt || { echo "::error::bes mutants survived"; exit 1; }
+      - name: behavioral-entropy generalization re-derives (one-class holds on UNSEEN attack families)
+        run: node bes-verify.mjs --check
       - name: the seal is exactly what the committed inputs give
         run: node tools/redteam.mjs --check
       - name: the battery re-runs — the grown detector is identical, the gate counts match

@@ -117,6 +117,7 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:v
 </header>
 <h2>The verdict</h2>
 <div class="card verdict"><p class="big">${run ? '<span class="stat">' + j.passed + ' of ' + j.of + '</span> sealed rules held.' : 'Sealed, being measured.'}</p><p>${esc(run ? headline.slice(headline.indexOf('The gate')) : headline)}</p></div>
+<div class="card" style="border-color:var(--gold)"><p style="margin:0">▶ <b>v3 · Behavioral Entropy Signatures</b> — the one-class answer to flag3 (the grown detector's honest held-out failure): model the operator's own entropy across three domains and flag deviation from the operator's OWN baseline, so an attack family the gate never saw is caught by construction. Measured: 2% operator false-positive, 100% of two unseen attack families. <a href="bes.html">Open the BES gate →</a></p></div>
 ${body}
 <h2>The 6-byte packet</h2>
 <div class="card"><p class="quiet" style="margin-top:0">A command is six bytes — the Primorial-Fold packet. On the wire it travels signed: <code>[sourceId:1][payload:6][Ed25519 signature:64]</code> = 71 bytes.</p>
@@ -137,6 +138,7 @@ ${body}
 <footer>
  <p>Every number here comes from the mutation-gated kernel <code>sentinel.mjs</code>, inlined below. · <a href="${REPO}">source</a> · MIT for the code.</p>
  <p>The κ-witness is the primorial fold of Thomas Frumkin's codec; the capability lattice is the estate's wallet. ${CREDIT}.</p>
+ <p>The <a href="bes.html">Behavioral Entropy Signatures</a> gate is a faithful implementation of Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps" (2025, Open Defensive Prior Art). Behavior over credential, entropy over signature.</p>
 </footer>
 </div>
 <script id="kernel" type="text/plain">

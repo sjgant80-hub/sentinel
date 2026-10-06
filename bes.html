@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SENTINEL · Behavioral Entropy</title>
+<meta name="description" content="Behavioral Entropy Signatures: the one-class answer to the grown detector's held-out failure. Model the operator's own entropy across three domains and flag deviation from the operator's OWN baseline — so attack families the gate never saw are caught by construction. A faithful implementation of Gary W. Floyd's GEP-BES.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/sentinel/bes.html">
+<style>
+:root{--bg:#0c0b10;--panel:#15131b;--line:#2d2a36;--ink:#ece6d6;--dim:#a39c8c;--faint:#6f6a78;--gold:#d6a93a;--soft:#e9cf7f;--ok:#5fbf8f;--no:#e0616d;--warn:#f5c542;
+ --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6}
+.wrap{max-width:56rem;margin:0 auto;padding:0 16px 5rem}
+header{padding:3rem 0 1rem}.kick{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 .6rem}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,6vw,3rem);margin:0 0 .5rem;color:var(--soft)}
+.lede{font-family:var(--serif);font-style:italic;color:var(--dim);font-size:clamp(1rem,2.4vw,1.2rem);margin:0;max-width:44rem}
+h2{font-family:var(--serif);font-weight:500;color:var(--gold);font-size:1.3rem;margin:2.2rem 0 .4rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:.8rem 0}
+.verdict-card{border-color:var(--gold)}
+.selfcheck{display:flex;align-items:center;gap:10px;margin:16px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:#101a12;font-size:.9rem}
+.selfcheck .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}.selfcheck.bad{background:#1a0f10}.selfcheck.bad .dot{background:var(--no)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:.45rem .5rem;border-top:1px solid var(--line)}th{color:var(--faint);font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;border-top:0}
+td.n{text-align:right;font-variant-numeric:tabular-nums}tr.best td{color:var(--soft);font-weight:600}
+.big{font-size:1.1rem;margin-top:0}.stat{font-variant-numeric:tabular-nums;font-weight:700;color:var(--soft)}.quiet{color:var(--dim);font-size:.92rem}
+.v{display:inline-block;font-family:var(--mono);font-weight:700;padding:3px 10px;border-radius:7px;font-size:.85rem}
+.v.ALLOW{background:#123322;color:var(--ok)}.v.THROTTLE,.v["STEP-UP"]{background:#2a2410;color:var(--warn)}.v.STEPUP{background:#2a2410;color:var(--warn)}.v.BLOCK{background:#2a1416;color:var(--no)}.v.ISOLATE{background:#2a1416;color:var(--no)}
+.bar{height:10px;border-radius:6px;background:#0d1017;overflow:hidden;border:1px solid var(--line);margin:4px 0}.bar>i{display:block;height:100%;background:var(--gold)}
+input[type=range]{width:100%}button{font:inherit;background:var(--gold);color:#16130c;border:0;border-radius:8px;padding:.55rem 1rem;font-weight:600;cursor:pointer}button:hover{background:var(--soft)}
+a{color:var(--soft)}code{font-family:var(--mono);font-size:.85em;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.05em .3em}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:.88rem}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--faint);font-size:.84rem}
+</style></head><body><div class="wrap">
+<header>
+ <p class="kick">An estate organ · SENTINEL · v3 behavioral entropy</p>
+ <h1>You are how you behave</h1>
+ <p class="lede">The grown stream detector learned where attacks sit and overfit its clean margin — under a distribution shift it did not transfer (flag3, reported honestly). The answer is one-class: model the operator's OWN behavioral entropy across three domains and flag deviation from the operator's own baseline, so an attack family the gate never saw is caught by construction.</p>
+</header>
+
+<div class="selfcheck" id="selfcheck"><span class="dot"></span><span id="sc">Re-deriving the held-out generalization from the kernel…</span></div>
+
+<h2>The held-out generalization</h2>
+<div class="card verdict-card">
+  <p class="big" id="headline">…</p>
+  <table><thead><tr><th>window set</th><th>n</th><th>flagged</th><th>rate</th></tr></thead><tbody id="results"></tbody></table>
+  <p class="quiet" id="note"></p>
+</div>
+
+<h2>The GEP decision — move the deviation, watch the gate</h2>
+<div class="card">
+  <p class="quiet" style="margin-top:0">The unified entropy deviation from the operator baseline is the instability field E(t). The gate's bands are calibrated from the operator alone. Credential validity never enters — only the entropy state.</p>
+  <div class="row"><span>deviation from baseline</span><span id="devv" class="stat"></span></div>
+  <div class="bar"><i id="devbar"></i></div>
+  <input type="range" id="dev" min="0" max="1.2" step="0.01" value="0.2">
+  <p style="margin:.6rem 0 0">verdict: <span id="verdict" class="v">—</span> &nbsp;<span class="quiet" id="E"></span></p>
+  <table style="margin-top:.8rem"><thead><tr><th>band</th><th>verdict</th><th>meaning</th></tr></thead><tbody id="ladder"></tbody></table>
+</div>
+
+<h2>Re-run · own your signature</h2>
+<div class="card">
+  <p style="margin-top:0">The operator baseline and the held-out evaluation are pure and seeded — they re-run here from the same kernel and must match the committed record.</p>
+  <button id="rerun" type="button">Re-run the evaluation</button>
+  <button id="dl" type="button" style="background:transparent;border:1px solid var(--gold);color:var(--soft)">⬇ Download the operator signature</button>
+  <span id="rerout" class="quiet" role="status" aria-live="polite"></span>
+</div>
+
+<h2>Why this generalizes (Gary W. Floyd's GEP-BES)</h2>
+<div class="card quiet">
+  <p style="margin-top:0"><b>Identity is insufficient. Behavior is authoritative.</b> "Are you behaving like yourself?" — the gate models the operator, not the attacks, so it never learns an attack boundary to overfit. Attackers fail by being <b>overly regular</b> (scripted — a narrow repeated pattern, the wrong distribution) or <b>randomly variant</b> (uncorrelated — flat, no operator peaks). Both read as high deviation from the operator's structured baseline. <b>Credential validity does not override entropy violation.</b></p>
+  <p><b>Honest scope (Gary §8):</b> this performs <b>stability regulation</b> — whether behavior matches the operator — not morality, intent, or malware classification. The three domains (network / behavioral / authorization) and the ALLOW/THROTTLE/STEP-UP/BLOCK/ISOLATE decision are measured here on a seeded synthetic operator; a production baseline forms online over roughly two weeks.</p>
+</div>
+
+<footer>
+ <p>The one-class behavioral-entropy gate <code>bes.mjs</code> is mutation-witnessed (score 1.0) and its held-out generalization re-derives in CI. Back to the <a href="./index.html">signed-packet gate</a> · <a href="https://github.com/sjgant80-hub/sentinel">source</a>.</p>
+ <p>A faithful implementation of <b>Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps," 2025</b> (Open Defensive Prior Art, CC BY 4.0). The κ-witness is Thomas Frumkin's codec; powered by the Konomi architecture.</p>
+</footer>
+</div>
+
+<script type="module">
+import { baseline, calibrate, evaluate, decide } from './bes.mjs';
+import { windows, operatorWindow, scriptedWindow, randomWindow, CONFIG } from './behavior.mjs';
+const $ = (id) => document.getElementById(id);
+
+const train = windows(operatorWindow, CONFIG.trainSeed, CONFIG.trainCount, CONFIG.n);
+const base = baseline(train);
+const th = calibrate(base);
+function evalAll() {
+  return evaluate(base,
+    windows(operatorWindow, CONFIG.opHeldSeed, CONFIG.opHeldCount, CONFIG.n),
+    windows(scriptedWindow, CONFIG.scriptSeed, CONFIG.scriptCount, CONFIG.n),
+    windows(randomWindow, CONFIG.randSeed, CONFIG.randCount, CONFIG.n));
+}
+const r = evalAll();
+
+$('results').innerHTML = [
+  ['operator (held-out)', r.operator.n, r.operator.falseFlags, r.operator.fpRate, 'best'],
+  ['scripted attack (unseen)', r.scripted.n, r.scripted.caught, r.scripted.detect, ''],
+  ['random attack (unseen)', r.random.n, r.random.caught, r.random.detect, ''],
+].map(([name, n, flagged, rate, cls]) => `<tr class="${cls}"><td>${name}</td><td class="n">${n}</td><td class="n">${flagged}</td><td class="n">${(rate * 100).toFixed(0)}%</td></tr>`).join('');
+const gen = r.operator.fpRate <= 0.1 && r.scripted.detect >= 0.9 && r.random.detect >= 0.9;
+$('headline').innerHTML = gen
+  ? `<span class="stat">${(r.operator.fpRate * 100).toFixed(0)}%</span> operator false-positive, <span class="stat">100%</span> of two <b>unseen</b> attack families caught — it generalizes.`
+  : 'Did not generalize on this run.';
+$('note').innerHTML = 'The gate was calibrated on the operator alone (' + base.n + ' sessions); these attack families were never used to set it. The grown two-class detector (flag3) over-flagged under the same kind of shift; the one-class model holds.';
+
+// GEP decision ladder
+const LADDER = [['< allow', 'ALLOW', 'behaving like the operator'], ['allow–block', 'THROTTLE / STEP-UP', 'minor deviation · STEP-UP when it is an authorization spike'], ['≥ block', 'BLOCK', 'entropy violation'], ['≥ isolate (all domains)', 'ISOLATE', 'critical anomaly across network, behavior and auth']];
+$('ladder').innerHTML = LADDER.map(([b, v, m]) => `<tr><td class="n">${b}</td><td>${v}</td><td class="quiet">${m}</td></tr>`).join('');
+function renderDev() {
+  const u = parseFloat($('dev').value);
+  const d = decide({ unified: u, net: u / 3, beh: u / 3, auth: u / 3 }, th);
+  $('devv').textContent = u.toFixed(2) + ' (bands: allow ' + th.allow.toFixed(2) + ' · block ' + th.block.toFixed(2) + ' · isolate ' + th.isolate.toFixed(2) + ')';
+  $('devbar').style.width = Math.min(100, (u / 1.2) * 100) + '%';
+  const vcls = d.verdict.replace('-', '');
+  $('verdict').className = 'v ' + vcls; $('verdict').textContent = d.verdict;
+  $('E').textContent = 'instability E(t) = ' + d.E.toFixed(3);
+}
+$('dev').addEventListener('input', renderDev); renderDev();
+
+$('rerun').addEventListener('click', () => {
+  const r2 = evalAll();
+  const same = r2.operator.fpRate === r.operator.fpRate && r2.scripted.detect === r.scripted.detect && r2.random.detect === r.random.detect;
+  $('rerout').textContent = ' re-derived: operator FP ' + (r2.operator.fpRate * 100).toFixed(0) + '%, scripted ' + r2.scripted.caught + '/' + r2.scripted.n + ', random ' + r2.random.caught + '/' + r2.random.n + (same ? ' — identical to the first run.' : ' — differs (!)');
+});
+$('dl').addEventListener('click', () => {
+  const sig = { kind: 'bes-operator-signature', note: 'The operator\'s behavioral entropy signature and the gate bands calibrated from it alone. Credit: Gary W. Floyd, GEP-BES.', profile: base.profile, devMean: base.devMean, devStd: base.devStd, thresholds: th, trainSessions: base.n };
+  try { const u = URL.createObjectURL(new Blob([JSON.stringify(sig, null, 2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = u; a.download = 'bes-operator-signature.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1500); } catch (e) { $('rerout').textContent = 'download blocked: ' + e.message; }
+});
+
+// self-check against the sealed record
+(async () => {
+  try {
+    const preds = await fetch('./bes.predictions.json').then((x) => x.json());
+    const ex = preds.expected;
+    const ok = r.operator.fpRate === ex.opFpRate && r.scripted.caught === ex.scriptCaught && r.random.caught === ex.randCaught && gen === ex.generalizes;
+    $('sc').innerHTML = ok
+      ? 'Self-check ✓ — re-derived live: operator FP ' + (r.operator.fpRate * 100).toFixed(0) + '% (' + r.operator.falseFlags + '/' + r.operator.n + '), both unseen attack families caught 100%, GENERALIZES. Matches the sealed record.'
+      : 'Self-check mismatch — do not trust this build.';
+    if (!ok) $('selfcheck').classList.add('bad');
+  } catch { $('sc').textContent = 'Self-check: predictions not reachable here; the evaluation above is still live from the kernel.'; }
+})();
+</script>
+</body></html>
